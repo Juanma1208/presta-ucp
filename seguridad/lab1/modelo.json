@@ -1,5 +1,5 @@
 {
-  "version": "2.3.0",
+  "version": "2.6.2",
   "summary": {
     "title": "PrestaUCP",
     "owner": "Juan Manuel Valencia García",
@@ -14,7 +14,7 @@
     ],
     "diagrams": [
       {
-        "version": "2.3.0",
+        "version": "2.6.2",
         "title": "PrestaUCP: registro, préstamos y devoluciones",
         "description": "DFD con 2 límites de confianza: Internet | servidor y aplicación | almacenamiento.",
         "thumbnail": "./public/content/images/thumbnail.stride.jpg",
@@ -22,145 +22,9 @@
         "id": 0,
         "cells": [
           {
-            "shape": "trust-boundary-curve",
-            "attrs": {
-              "line": {
-                "targetMarker": "",
-                "sourceMarker": ""
-              }
-            },
-            "width": 200,
-            "height": 100,
-            "zIndex": 10,
-            "labels": [
-              {
-                "markup": [
-                  {
-                    "tagName": "ellipse",
-                    "selector": "labelBody"
-                  },
-                  {
-                    "tagName": "text",
-                    "selector": "labelText"
-                  }
-                ],
-                "attrs": {
-                  "labelText": {
-                    "text": "L1 · Internet | servidor",
-                    "textAnchor": "middle",
-                    "textVerticalAnchor": "middle"
-                  },
-                  "labelBody": {
-                    "ref": "labelText",
-                    "refRx": "50%",
-                    "refRy": "60%",
-                    "fill": "#fff",
-                    "strokeWidth": 0
-                  }
-                },
-                "position": 0.5
-              }
-            ],
-            "connector": "smooth",
-            "data": {
-              "type": "tm.Boundary",
-              "name": "L1 · Internet | servidor",
-              "description": "Todo lo que llega del navegador o de un script es no confiable: el token, el JSON del registro, los días del préstamo, la búsqueda y los ids de la URL.",
-              "isTrustBoundary": true,
-              "hasOpenThreats": false
-            },
-            "id": "c3a1cc51-76aa-483f-b8bd-62627fd8cdfe",
-            "source": {
-              "x": 240,
-              "y": 10
-            },
-            "target": {
-              "x": 240,
-              "y": 700
-            },
-            "vertices": [
-              {
-                "x": 230,
-                "y": 250
-              },
-              {
-                "x": 250,
-                "y": 480
-              }
-            ]
-          },
-          {
-            "shape": "trust-boundary-curve",
-            "attrs": {
-              "line": {
-                "targetMarker": "",
-                "sourceMarker": ""
-              }
-            },
-            "width": 200,
-            "height": 100,
-            "zIndex": 10,
-            "labels": [
-              {
-                "markup": [
-                  {
-                    "tagName": "ellipse",
-                    "selector": "labelBody"
-                  },
-                  {
-                    "tagName": "text",
-                    "selector": "labelText"
-                  }
-                ],
-                "attrs": {
-                  "labelText": {
-                    "text": "L2 · Aplicación | almacenamiento",
-                    "textAnchor": "middle",
-                    "textVerticalAnchor": "middle"
-                  },
-                  "labelBody": {
-                    "ref": "labelText",
-                    "refRx": "50%",
-                    "refRy": "60%",
-                    "fill": "#fff",
-                    "strokeWidth": 0
-                  }
-                },
-                "position": 0.5
-              }
-            ],
-            "connector": "smooth",
-            "data": {
-              "type": "tm.Boundary",
-              "name": "L2 · Aplicación | almacenamiento",
-              "description": "La base SQLite y los logs viven en el volumen de Docker. Quien llegue a ese volumen (o a una copia de la base) lee todo sin pasar por la API.",
-              "isTrustBoundary": true,
-              "hasOpenThreats": false
-            },
-            "id": "fce6ca3e-a26b-4a6a-8601-3b1e9e1ae16e",
-            "source": {
-              "x": 660,
-              "y": 10
-            },
-            "target": {
-              "x": 660,
-              "y": 700
-            },
-            "vertices": [
-              {
-                "x": 650,
-                "y": 250
-              },
-              {
-                "x": 670,
-                "y": 480
-              }
-            ]
-          },
-          {
             "position": {
-              "x": 20,
-              "y": 520
+              "x": -10,
+              "y": 530
             },
             "size": {
               "width": 170,
@@ -276,8 +140,8 @@
           },
           {
             "position": {
-              "x": 20,
-              "y": 290
+              "x": -30,
+              "y": 250
             },
             "size": {
               "width": 170,
@@ -522,8 +386,8 @@
           },
           {
             "position": {
-              "x": 410,
-              "y": 470
+              "x": 450,
+              "y": 490
             },
             "size": {
               "width": 140,
@@ -888,8 +752,8 @@
           },
           {
             "position": {
-              "x": 740,
-              "y": 170
+              "x": 780,
+              "y": 70
             },
             "size": {
               "width": 220,
@@ -1025,8 +889,8 @@
           },
           {
             "position": {
-              "x": 740,
-              "y": 500
+              "x": 750,
+              "y": 525
             },
             "size": {
               "width": 220,
@@ -1161,34 +1025,34 @@
             }
           },
           {
-            "shape": "flow",
+            "shape": "trust-boundary-curve",
             "attrs": {
               "line": {
-                "stroke": "red",
-                "targetMarker": {
-                  "name": "block"
-                },
-                "strokeDasharray": ""
+                "targetMarker": "",
+                "sourceMarker": ""
               }
             },
             "width": 200,
             "height": 100,
             "zIndex": 10,
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Boundary",
+              "name": "L1 · Internet | servidor",
+              "description": "Todo lo que llega del navegador o de un script es no confiable: el token, el JSON del registro, los días del préstamo, la búsqueda y los ids de la URL.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false,
+              "crossingFlows": [],
+              "containedElements": []
+            },
             "labels": [
               {
-                "markup": [
-                  {
-                    "tagName": "ellipse",
-                    "selector": "labelBody"
-                  },
-                  {
-                    "tagName": "text",
-                    "selector": "labelText"
-                  }
-                ],
                 "attrs": {
+                  "label": {
+                    "text": "Trust Boundary"
+                  },
                   "labelText": {
-                    "text": "Registro (nombre, documento, correo,\nteléfono, clave, rol) y login",
+                    "text": "L1 · Internet | servidor",
                     "textAnchor": "middle",
                     "textVerticalAnchor": "middle"
                   },
@@ -1200,15 +1064,137 @@
                     "strokeWidth": 0
                   }
                 },
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
                 "position": 0.5
               }
             ],
+            "id": "c3a1cc51-76aa-483f-b8bd-62627fd8cdfe",
+            "source": {
+              "x": 240,
+              "y": 10
+            },
+            "target": {
+              "x": 240,
+              "y": 700
+            },
+            "vertices": [
+              {
+                "x": 230,
+                "y": 250
+              },
+              {
+                "x": 250,
+                "y": 480
+              }
+            ]
+          },
+          {
+            "shape": "trust-boundary-curve",
+            "attrs": {
+              "line": {
+                "targetMarker": "",
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Boundary",
+              "name": "L2 · Aplicación | almacenamiento",
+              "description": "La base SQLite y los logs viven en el volumen de Docker. Quien llegue a ese volumen (o a una copia de la base) lee todo sin pasar por la API.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false,
+              "crossingFlows": [],
+              "containedElements": []
+            },
+            "labels": [
+              {
+                "attrs": {
+                  "label": {
+                    "text": "Trust Boundary"
+                  },
+                  "labelText": {
+                    "text": "L2 · Aplicación | almacenamiento",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "position": 0.5
+              }
+            ],
+            "id": "fce6ca3e-a26b-4a6a-8601-3b1e9e1ae16e",
+            "source": {
+              "x": 660,
+              "y": 10
+            },
+            "target": {
+              "x": 660,
+              "y": 700
+            },
+            "vertices": [
+              {
+                "x": 650,
+                "y": 250
+              },
+              {
+                "x": 670,
+                "y": 480
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "red",
+                "strokeWidth": 2.5,
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": {
+                  "name": ""
+                },
+                "strokeDasharray": null
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
             "connector": "smooth",
             "data": {
               "type": "tm.Flow",
               "name": "Registro (nombre, documento, correo,\nteléfono, clave, rol) y login",
               "description": "Cruza L1. El JSON lo arma el cliente.",
               "outOfScope": false,
+              "isTrustBoundary": false,
               "reasonOutOfScope": "",
               "hasOpenThreats": true,
               "isBidirectional": false,
@@ -1228,8 +1214,11 @@
                   "score": "6"
                 }
               ],
-              "isTrustBoundary": false
+              "trustBoundaryIds": []
             },
+            "labels": [
+              "Registro (nombre, documento, correo,\nteléfono, clave, rol) y login"
+            ],
             "id": "c1a00423-8f57-42c0-9354-84bc29e22cc2",
             "source": {
               "cell": "68bf0dce-30e1-4ab3-96bd-abd914be379d"
@@ -1239,8 +1228,8 @@
             },
             "vertices": [
               {
-                "x": 300,
-                "y": 560
+                "x": 330,
+                "y": 500
               }
             ]
           },
@@ -1258,19 +1247,28 @@
             "width": 200,
             "height": 100,
             "zIndex": 10,
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Token JWT / usuario creado\n(incluye el hash)",
+              "description": "Cruza L1.",
+              "outOfScope": false,
+              "isTrustBoundary": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": true,
+              "protocol": "HTTP",
+              "threats": [],
+              "trustBoundaryIds": []
+            },
             "labels": [
               {
-                "markup": [
-                  {
-                    "tagName": "ellipse",
-                    "selector": "labelBody"
-                  },
-                  {
-                    "tagName": "text",
-                    "selector": "labelText"
-                  }
-                ],
                 "attrs": {
+                  "label": {
+                    "text": "Data Flow"
+                  },
                   "labelText": {
                     "text": "Token JWT / usuario creado\n(incluye el hash)",
                     "textAnchor": "middle",
@@ -1284,24 +1282,19 @@
                     "strokeWidth": 0
                   }
                 },
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
                 "position": 0.5
               }
             ],
-            "connector": "smooth",
-            "data": {
-              "type": "tm.Flow",
-              "name": "Token JWT / usuario creado\n(incluye el hash)",
-              "description": "Cruza L1.",
-              "outOfScope": false,
-              "reasonOutOfScope": "",
-              "hasOpenThreats": false,
-              "isBidirectional": false,
-              "isEncrypted": false,
-              "isPublicNetwork": true,
-              "protocol": "HTTP",
-              "threats": [],
-              "isTrustBoundary": false
-            },
             "id": "18bb1560-9c88-4ad4-a33a-8db40cf47061",
             "source": {
               "cell": "04572029-1970-4e77-be87-415057b7de4e"
@@ -1311,8 +1304,8 @@
             },
             "vertices": [
               {
-                "x": 300,
-                "y": 620
+                "x": 320,
+                "y": 640
               }
             ]
           },
@@ -1330,41 +1323,13 @@
             "width": 200,
             "height": 100,
             "zIndex": 10,
-            "labels": [
-              {
-                "markup": [
-                  {
-                    "tagName": "ellipse",
-                    "selector": "labelBody"
-                  },
-                  {
-                    "tagName": "text",
-                    "selector": "labelText"
-                  }
-                ],
-                "attrs": {
-                  "labelText": {
-                    "text": "Búsqueda ?buscar= (sin token)",
-                    "textAnchor": "middle",
-                    "textVerticalAnchor": "middle"
-                  },
-                  "labelBody": {
-                    "ref": "labelText",
-                    "refRx": "50%",
-                    "refRy": "60%",
-                    "fill": "#fff",
-                    "strokeWidth": 0
-                  }
-                },
-                "position": 0.5
-              }
-            ],
             "connector": "smooth",
             "data": {
               "type": "tm.Flow",
               "name": "Búsqueda ?buscar= (sin token)",
               "description": "Cruza L1 sin autenticación.",
               "outOfScope": false,
+              "isTrustBoundary": false,
               "reasonOutOfScope": "",
               "hasOpenThreats": true,
               "isBidirectional": false,
@@ -1384,8 +1349,40 @@
                   "score": "9"
                 }
               ],
-              "isTrustBoundary": false
+              "trustBoundaryIds": []
             },
+            "labels": [
+              {
+                "attrs": {
+                  "label": {
+                    "text": "Data Flow"
+                  },
+                  "labelText": {
+                    "text": "Búsqueda ?buscar= (sin token)",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "position": 0.5
+              }
+            ],
             "id": "c13b22c0-2e81-418a-9216-f6f65029086e",
             "source": {
               "cell": "68bf0dce-30e1-4ab3-96bd-abd914be379d"
@@ -1395,8 +1392,8 @@
             },
             "vertices": [
               {
-                "x": 320,
-                "y": 400
+                "x": 290,
+                "y": 430
               }
             ]
           },
@@ -1414,19 +1411,28 @@
             "width": 200,
             "height": 100,
             "zIndex": 10,
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Token, equipo_id y días del préstamo,\nid del préstamo, devolución",
+              "description": "Cruza L1. El token, los ids y los días los controla el cliente.",
+              "outOfScope": false,
+              "isTrustBoundary": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": true,
+              "protocol": "HTTP",
+              "threats": [],
+              "trustBoundaryIds": []
+            },
             "labels": [
               {
-                "markup": [
-                  {
-                    "tagName": "ellipse",
-                    "selector": "labelBody"
-                  },
-                  {
-                    "tagName": "text",
-                    "selector": "labelText"
-                  }
-                ],
                 "attrs": {
+                  "label": {
+                    "text": "Data Flow"
+                  },
                   "labelText": {
                     "text": "Token, equipo_id y días del préstamo,\nid del préstamo, devolución",
                     "textAnchor": "middle",
@@ -1440,15 +1446,54 @@
                     "strokeWidth": 0
                   }
                 },
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
                 "position": 0.5
               }
             ],
+            "id": "37bc4e79-3c6d-4cc1-90e2-ea9bea994218",
+            "source": {
+              "cell": "1ba94391-a961-4f18-8673-d5aad6b72048"
+            },
+            "target": {
+              "cell": "f36e46be-51a1-42ca-af65-5eb232e78421"
+            },
+            "vertices": [
+              {
+                "x": 200,
+                "y": 220
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
             "connector": "smooth",
             "data": {
               "type": "tm.Flow",
-              "name": "Token, equipo_id y días del préstamo,\nid del préstamo, devolución",
-              "description": "Cruza L1. El token, los ids y los días los controla el cliente.",
+              "name": "Préstamos con datos personales,\ncatálogo de equipos",
+              "description": "Cruza L1.",
               "outOfScope": false,
+              "isTrustBoundary": false,
               "reasonOutOfScope": "",
               "hasOpenThreats": false,
               "isBidirectional": false,
@@ -1456,14 +1501,46 @@
               "isPublicNetwork": true,
               "protocol": "HTTP",
               "threats": [],
-              "isTrustBoundary": false
+              "trustBoundaryIds": []
             },
-            "id": "37bc4e79-3c6d-4cc1-90e2-ea9bea994218",
+            "labels": [
+              {
+                "attrs": {
+                  "label": {
+                    "text": "Data Flow"
+                  },
+                  "labelText": {
+                    "text": "Préstamos con datos personales,\ncatálogo de equipos",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "position": 0.5
+              }
+            ],
+            "id": "6ae9d2d1-d9ec-43e0-9d80-8b4b6861fa95",
             "source": {
-              "cell": "1ba94391-a961-4f18-8673-d5aad6b72048"
+              "cell": "f36e46be-51a1-42ca-af65-5eb232e78421"
             },
             "target": {
-              "cell": "f36e46be-51a1-42ca-af65-5eb232e78421"
+              "cell": "1ba94391-a961-4f18-8673-d5aad6b72048"
             },
             "vertices": [
               {
@@ -1486,41 +1563,13 @@
             "width": 200,
             "height": 100,
             "zIndex": 10,
-            "labels": [
-              {
-                "markup": [
-                  {
-                    "tagName": "ellipse",
-                    "selector": "labelBody"
-                  },
-                  {
-                    "tagName": "text",
-                    "selector": "labelText"
-                  }
-                ],
-                "attrs": {
-                  "labelText": {
-                    "text": "Préstamos con datos personales,\ncatálogo de equipos",
-                    "textAnchor": "middle",
-                    "textVerticalAnchor": "middle"
-                  },
-                  "labelBody": {
-                    "ref": "labelText",
-                    "refRx": "50%",
-                    "refRy": "60%",
-                    "fill": "#fff",
-                    "strokeWidth": 0
-                  }
-                },
-                "position": 0.5
-              }
-            ],
             "connector": "smooth",
             "data": {
               "type": "tm.Flow",
-              "name": "Préstamos con datos personales,\ncatálogo de equipos",
+              "name": "Token admin, equipo nuevo,\ndevoluciones",
               "description": "Cruza L1.",
               "outOfScope": false,
+              "isTrustBoundary": false,
               "reasonOutOfScope": "",
               "hasOpenThreats": false,
               "isBidirectional": false,
@@ -1528,49 +1577,14 @@
               "isPublicNetwork": true,
               "protocol": "HTTP",
               "threats": [],
-              "isTrustBoundary": false
+              "trustBoundaryIds": []
             },
-            "id": "6ae9d2d1-d9ec-43e0-9d80-8b4b6861fa95",
-            "source": {
-              "cell": "f36e46be-51a1-42ca-af65-5eb232e78421"
-            },
-            "target": {
-              "cell": "1ba94391-a961-4f18-8673-d5aad6b72048"
-            },
-            "vertices": [
-              {
-                "x": 300,
-                "y": 360
-              }
-            ]
-          },
-          {
-            "shape": "flow",
-            "attrs": {
-              "line": {
-                "stroke": "#333333",
-                "targetMarker": {
-                  "name": "block"
-                },
-                "strokeDasharray": ""
-              }
-            },
-            "width": 200,
-            "height": 100,
-            "zIndex": 10,
             "labels": [
               {
-                "markup": [
-                  {
-                    "tagName": "ellipse",
-                    "selector": "labelBody"
-                  },
-                  {
-                    "tagName": "text",
-                    "selector": "labelText"
-                  }
-                ],
                 "attrs": {
+                  "label": {
+                    "text": "Data Flow"
+                  },
                   "labelText": {
                     "text": "Token admin, equipo nuevo,\ndevoluciones",
                     "textAnchor": "middle",
@@ -1584,24 +1598,19 @@
                     "strokeWidth": 0
                   }
                 },
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
                 "position": 0.5
               }
             ],
-            "connector": "smooth",
-            "data": {
-              "type": "tm.Flow",
-              "name": "Token admin, equipo nuevo,\ndevoluciones",
-              "description": "Cruza L1.",
-              "outOfScope": false,
-              "reasonOutOfScope": "",
-              "hasOpenThreats": false,
-              "isBidirectional": false,
-              "isEncrypted": false,
-              "isPublicNetwork": true,
-              "protocol": "HTTP",
-              "threats": [],
-              "isTrustBoundary": false
-            },
             "id": "56770ce7-2d13-408a-bb42-8f4b70a371d8",
             "source": {
               "cell": "0db891ef-502f-478f-8125-147b2e999804"
@@ -1611,8 +1620,8 @@
             },
             "vertices": [
               {
-                "x": 300,
-                "y": 120
+                "x": 390,
+                "y": 100
               }
             ]
           },
@@ -1630,19 +1639,28 @@
             "width": 200,
             "height": 100,
             "zIndex": 10,
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Usuarios: insertar y buscar por correo",
+              "description": "Cruza L2.",
+              "outOfScope": false,
+              "isTrustBoundary": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "protocol": "SQLite (archivo local)",
+              "threats": [],
+              "trustBoundaryIds": []
+            },
             "labels": [
               {
-                "markup": [
-                  {
-                    "tagName": "ellipse",
-                    "selector": "labelBody"
-                  },
-                  {
-                    "tagName": "text",
-                    "selector": "labelText"
-                  }
-                ],
                 "attrs": {
+                  "label": {
+                    "text": "Data Flow"
+                  },
                   "labelText": {
                     "text": "Usuarios: insertar y buscar por correo",
                     "textAnchor": "middle",
@@ -1656,24 +1674,19 @@
                     "strokeWidth": 0
                   }
                 },
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
                 "position": 0.5
               }
             ],
-            "connector": "smooth",
-            "data": {
-              "type": "tm.Flow",
-              "name": "Usuarios: insertar y buscar por correo",
-              "description": "Cruza L2.",
-              "outOfScope": false,
-              "reasonOutOfScope": "",
-              "hasOpenThreats": false,
-              "isBidirectional": false,
-              "isEncrypted": false,
-              "isPublicNetwork": false,
-              "protocol": "SQLite (archivo local)",
-              "threats": [],
-              "isTrustBoundary": false
-            },
             "id": "a3cabe52-0223-4db6-bc72-0ad33a4a7889",
             "source": {
               "cell": "04572029-1970-4e77-be87-415057b7de4e"
@@ -1683,8 +1696,12 @@
             },
             "vertices": [
               {
-                "x": 700,
-                "y": 420
+                "x": 780,
+                "y": 440
+              },
+              {
+                "x": 830,
+                "y": 370
               }
             ]
           },
@@ -1702,19 +1719,28 @@
             "width": 200,
             "height": 100,
             "zIndex": 10,
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Consultas de equipos y préstamos",
+              "description": "Cruza L2.",
+              "outOfScope": false,
+              "isTrustBoundary": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "protocol": "SQLite (archivo local)",
+              "threats": [],
+              "trustBoundaryIds": []
+            },
             "labels": [
               {
-                "markup": [
-                  {
-                    "tagName": "ellipse",
-                    "selector": "labelBody"
-                  },
-                  {
-                    "tagName": "text",
-                    "selector": "labelText"
-                  }
-                ],
                 "attrs": {
+                  "label": {
+                    "text": "Data Flow"
+                  },
                   "labelText": {
                     "text": "Consultas de equipos y préstamos",
                     "textAnchor": "middle",
@@ -1728,24 +1754,19 @@
                     "strokeWidth": 0
                   }
                 },
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
                 "position": 0.5
               }
             ],
-            "connector": "smooth",
-            "data": {
-              "type": "tm.Flow",
-              "name": "Consultas de equipos y préstamos",
-              "description": "Cruza L2.",
-              "outOfScope": false,
-              "reasonOutOfScope": "",
-              "hasOpenThreats": false,
-              "isBidirectional": false,
-              "isEncrypted": false,
-              "isPublicNetwork": false,
-              "protocol": "SQLite (archivo local)",
-              "threats": [],
-              "isTrustBoundary": false
-            },
             "id": "97f5ada3-133b-4bd7-9446-7b0a530760aa",
             "source": {
               "cell": "f36e46be-51a1-42ca-af65-5eb232e78421"
@@ -1774,19 +1795,28 @@
             "width": 200,
             "height": 100,
             "zIndex": 10,
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Líneas de acceso (método, ruta, código)",
+              "description": "Cruza L2.",
+              "outOfScope": false,
+              "isTrustBoundary": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "protocol": "stdout del contenedor",
+              "threats": [],
+              "trustBoundaryIds": []
+            },
             "labels": [
               {
-                "markup": [
-                  {
-                    "tagName": "ellipse",
-                    "selector": "labelBody"
-                  },
-                  {
-                    "tagName": "text",
-                    "selector": "labelText"
-                  }
-                ],
                 "attrs": {
+                  "label": {
+                    "text": "Data Flow"
+                  },
                   "labelText": {
                     "text": "Líneas de acceso (método, ruta, código)",
                     "textAnchor": "middle",
@@ -1800,24 +1830,19 @@
                     "strokeWidth": 0
                   }
                 },
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
                 "position": 0.5
               }
             ],
-            "connector": "smooth",
-            "data": {
-              "type": "tm.Flow",
-              "name": "Líneas de acceso (método, ruta, código)",
-              "description": "Cruza L2.",
-              "outOfScope": false,
-              "reasonOutOfScope": "",
-              "hasOpenThreats": false,
-              "isBidirectional": false,
-              "isEncrypted": false,
-              "isPublicNetwork": false,
-              "protocol": "stdout del contenedor",
-              "threats": [],
-              "isTrustBoundary": false
-            },
             "id": "afb5e60a-fda8-4edd-8c0b-0161127cc552",
             "source": {
               "cell": "f36e46be-51a1-42ca-af65-5eb232e78421"
@@ -1827,8 +1852,8 @@
             },
             "vertices": [
               {
-                "x": 700,
-                "y": 420
+                "x": 600,
+                "y": 430
               }
             ]
           }
