@@ -1,0 +1,1842 @@
+{
+  "version": "2.3.0",
+  "summary": {
+    "title": "PrestaUCP",
+    "owner": "Juan Manuel Valencia García",
+    "description": "Modelo de amenazas de PrestaUCP, la API de préstamo de equipos del proyecto integrador (FastAPI + SQLite + JWT). Alcance: registro, login, catálogo, préstamos y devoluciones.",
+    "id": 0
+  },
+  "detail": {
+    "contributors": [
+      {
+        "name": "Juan Manuel Valencia García"
+      }
+    ],
+    "diagrams": [
+      {
+        "version": "2.3.0",
+        "title": "PrestaUCP: registro, préstamos y devoluciones",
+        "description": "DFD con 2 límites de confianza: Internet | servidor y aplicación | almacenamiento.",
+        "thumbnail": "./public/content/images/thumbnail.stride.jpg",
+        "diagramType": "STRIDE",
+        "id": 0,
+        "cells": [
+          {
+            "shape": "trust-boundary-curve",
+            "attrs": {
+              "line": {
+                "targetMarker": "",
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "labels": [
+              {
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "attrs": {
+                  "labelText": {
+                    "text": "L1 · Internet | servidor",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "position": 0.5
+              }
+            ],
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Boundary",
+              "name": "L1 · Internet | servidor",
+              "description": "Todo lo que llega del navegador o de un script es no confiable: el token, el JSON del registro, los días del préstamo, la búsqueda y los ids de la URL.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            },
+            "id": "c3a1cc51-76aa-483f-b8bd-62627fd8cdfe",
+            "source": {
+              "x": 240,
+              "y": 10
+            },
+            "target": {
+              "x": 240,
+              "y": 700
+            },
+            "vertices": [
+              {
+                "x": 230,
+                "y": 250
+              },
+              {
+                "x": 250,
+                "y": 480
+              }
+            ]
+          },
+          {
+            "shape": "trust-boundary-curve",
+            "attrs": {
+              "line": {
+                "targetMarker": "",
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "labels": [
+              {
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "attrs": {
+                  "labelText": {
+                    "text": "L2 · Aplicación | almacenamiento",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "position": 0.5
+              }
+            ],
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Boundary",
+              "name": "L2 · Aplicación | almacenamiento",
+              "description": "La base SQLite y los logs viven en el volumen de Docker. Quien llegue a ese volumen (o a una copia de la base) lee todo sin pasar por la API.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            },
+            "id": "fce6ca3e-a26b-4a6a-8601-3b1e9e1ae16e",
+            "source": {
+              "x": 660,
+              "y": 10
+            },
+            "target": {
+              "x": 660,
+              "y": 700
+            },
+            "vertices": [
+              {
+                "x": 650,
+                "y": 250
+              },
+              {
+                "x": 670,
+                "y": 480
+              }
+            ]
+          },
+          {
+            "position": {
+              "x": 20,
+              "y": 520
+            },
+            "size": {
+              "width": 170,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Visitante anónimo\n(sin token)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": ""
+              }
+            },
+            "visible": true,
+            "shape": "actor",
+            "zIndex": 5,
+            "ports": {
+              "groups": {
+                "top": {
+                  "position": "top",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "right": {
+                  "position": "right",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "bottom": {
+                  "position": "bottom",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "left": {
+                  "position": "left",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                }
+              },
+              "items": [
+                {
+                  "group": "top",
+                  "id": "9f6902aa-ee2b-4580-80b6-9dc56f7cdfb0"
+                },
+                {
+                  "group": "right",
+                  "id": "7ebf1814-0e1c-4aa9-a09b-efc97a4596a8"
+                },
+                {
+                  "group": "bottom",
+                  "id": "1972f401-a198-441d-b31c-acf1d9099dfb"
+                },
+                {
+                  "group": "left",
+                  "id": "a0e9a65e-0d79-497c-b2ef-d6328d3fda52"
+                }
+              ]
+            },
+            "id": "68bf0dce-30e1-4ab3-96bd-abd914be379d",
+            "data": {
+              "name": "Visitante anónimo\n(sin token)",
+              "description": "Cualquiera en Internet. Puede registrarse, iniciar sesión y buscar equipos sin token.",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "providesAuthentication": false
+            }
+          },
+          {
+            "position": {
+              "x": 20,
+              "y": 290
+            },
+            "size": {
+              "width": 170,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Estudiante\n(token JWT)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": ""
+              }
+            },
+            "visible": true,
+            "shape": "actor",
+            "zIndex": 5,
+            "ports": {
+              "groups": {
+                "top": {
+                  "position": "top",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "right": {
+                  "position": "right",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "bottom": {
+                  "position": "bottom",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "left": {
+                  "position": "left",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                }
+              },
+              "items": [
+                {
+                  "group": "top",
+                  "id": "0c9a4ef1-8a2c-4bd4-82ee-dde68dafd83e"
+                },
+                {
+                  "group": "right",
+                  "id": "a9ac0017-f811-4891-8713-5afcbb3ed1e4"
+                },
+                {
+                  "group": "bottom",
+                  "id": "a0f29737-4cca-43b2-a4e9-d4115df2906a"
+                },
+                {
+                  "group": "left",
+                  "id": "3c011644-5680-4102-9da8-995f4988c267"
+                }
+              ]
+            },
+            "id": "1ba94391-a961-4f18-8673-d5aad6b72048",
+            "data": {
+              "name": "Estudiante\n(token JWT)",
+              "description": "Usuario con rol estudiante. Pide préstamos y consulta los suyos con Authorization: Bearer <token>.",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "providesAuthentication": false
+            }
+          },
+          {
+            "position": {
+              "x": 20,
+              "y": 60
+            },
+            "size": {
+              "width": 170,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Administrador\n(token JWT, rol admin)"
+              },
+              "body": {
+                "stroke": "red",
+                "strokeWidth": 2.5,
+                "strokeDasharray": ""
+              }
+            },
+            "visible": true,
+            "shape": "actor",
+            "zIndex": 5,
+            "ports": {
+              "groups": {
+                "top": {
+                  "position": "top",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "right": {
+                  "position": "right",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "bottom": {
+                  "position": "bottom",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "left": {
+                  "position": "left",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                }
+              },
+              "items": [
+                {
+                  "group": "top",
+                  "id": "67193495-8ab9-46b2-b4af-ae225e7b50fe"
+                },
+                {
+                  "group": "right",
+                  "id": "c72a2262-358a-437a-a9da-62220756b85c"
+                },
+                {
+                  "group": "bottom",
+                  "id": "046a4865-7a5f-407a-8426-6a24a66715b7"
+                },
+                {
+                  "group": "left",
+                  "id": "8eacd540-e2cd-4912-883e-d739a65a14cc"
+                }
+              ]
+            },
+            "id": "0db891ef-502f-478f-8125-147b2e999804",
+            "data": {
+              "name": "Administrador\n(token JWT, rol admin)",
+              "description": "Agrega equipos, ve todos los préstamos y registra devoluciones.",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "T-15 · Cuenta de administrador por defecto con contraseña débil",
+                  "type": "Spoofing",
+                  "description": "La primera vez que arranca, la app crea admin@presta.edu.co con la contraseña admin123 (db.py:53), y esa cuenta aparece en el README público. Quien la pruebe entra como administrador. Impacto 3: control total del inventario y de los préstamos. Probabilidad 2: depende de que nadie haya cambiado la clave, y no existe una ruta para cambiarla. Riesgo: impacto 3 × probabilidad 2 = 6.",
+                  "mitigation": "Sin cuentas por defecto en producción: el primer administrador se crea con una clave aleatoria que se entrega por un canal aparte, y debe cambiarla en el primer ingreso. ASVS 5.0 V6 (autenticación).",
+                  "modelType": "STRIDE",
+                  "id": "b2a76f5f-2363-4e24-9610-3d8331023caa",
+                  "score": "6"
+                }
+              ],
+              "hasOpenThreats": true,
+              "providesAuthentication": false
+            }
+          },
+          {
+            "position": {
+              "x": 410,
+              "y": 470
+            },
+            "size": {
+              "width": 140,
+              "height": 140
+            },
+            "attrs": {
+              "text": {
+                "text": "Autenticación\n(registro y login)"
+              },
+              "body": {
+                "stroke": "red",
+                "strokeWidth": 2.5,
+                "strokeDasharray": ""
+              }
+            },
+            "visible": true,
+            "shape": "process",
+            "zIndex": 5,
+            "ports": {
+              "groups": {
+                "top": {
+                  "position": "top",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "right": {
+                  "position": "right",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "bottom": {
+                  "position": "bottom",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "left": {
+                  "position": "left",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                }
+              },
+              "items": [
+                {
+                  "group": "top",
+                  "id": "cef6a101-c171-41dd-bdc5-0149b455e0c6"
+                },
+                {
+                  "group": "right",
+                  "id": "d28ca37b-72b5-4ab3-baf7-71b3316025a5"
+                },
+                {
+                  "group": "bottom",
+                  "id": "ff0ca192-6d57-4409-a020-8ef26bb51330"
+                },
+                {
+                  "group": "left",
+                  "id": "68200913-2553-4eae-b83e-08e2b6f5f94b"
+                }
+              ]
+            },
+            "id": "04572029-1970-4e77-be87-415057b7de4e",
+            "data": {
+              "name": "Autenticación\n(registro y login)",
+              "description": "POST /registro y POST /login (main.py:68-91) con las funciones de auth.py: hash de la contraseña y creación del JWT.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "T-01 · Cualquiera se registra como administrador (asignación masiva)",
+                  "type": "Elevation of privilege",
+                  "description": "El modelo Registro acepta el campo rol con valor por defecto «estudiante» (main.py:43), y registrar() lo guarda tal como llega (main.py:69-78). Basta enviar \"rol\": \"admin\" en el JSON del registro para quedar como administrador. Impacto 3: control total de la app. Probabilidad 3: un solo POST sin token, y el campo aparece en la documentación /docs. Riesgo: impacto 3 × probabilidad 3 = 9.",
+                  "mitigation": "El registro ignora cualquier rol que envíe el cliente: toda cuenta nueva es estudiante. Solo un administrador puede cambiar roles. ASVS 5.0 V15 (asignación masiva) y V8 (autorización).",
+                  "modelType": "STRIDE",
+                  "id": "46800383-c738-4bcb-9947-fca4d0c08e62",
+                  "score": "9"
+                },
+                {
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "T-02 · El secreto del JWT está fijo en el código del repositorio público",
+                  "type": "Spoofing",
+                  "description": "SECRET_KEY = \"presta-ucp-2026\" (auth.py:8) está escrito en el código, que es público en GitHub, y además es corto (15 bytes; PyJWT lo advierte). Con ese secreto cualquiera firma un token con \"rol\": \"admin\" y la API lo acepta. Impacto 3: suplantar a cualquier usuario, incluido el administrador. Probabilidad 3: el secreto está a la vista en el repositorio. Riesgo: impacto 3 × probabilidad 3 = 9.",
+                  "mitigation": "El secreto se lee de una variable de entorno, es aleatorio y de al menos 32 bytes, no está en el código ni en el historial de git, y se rota. ASVS 5.0 V13 (configuración y secretos) y V9 (tokens).",
+                  "modelType": "STRIDE",
+                  "id": "3d9b37dc-2132-4234-9944-fb2e30ec3883",
+                  "score": "9"
+                },
+                {
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "T-03 · Tokens sin expiración ni cierre de sesión",
+                  "type": "Spoofing",
+                  "description": "crear_token() solo guarda sub y rol (auth.py:22-24), sin exp, y no existe logout ni revocación. Un token robado sirve para siempre, aunque el usuario cambie de rol. Impacto 3: suplantación permanente. Probabilidad 2: primero hay que robar el token (por ejemplo, en el tráfico sin TLS de T-14). Riesgo: impacto 3 × probabilidad 2 = 6.",
+                  "mitigation": "Tokens con exp corto (por ejemplo, 1 hora), validación de exp al leerlos y una forma de revocarlos. ASVS 5.0 V9 (tokens) y V7 (sesiones).",
+                  "modelType": "STRIDE",
+                  "id": "f63d2468-9563-4f66-be3b-ec9c8087d8d9",
+                  "score": "6"
+                },
+                {
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "T-04 · Login sin límite de intentos y con contraseñas débiles",
+                  "type": "Spoofing",
+                  "description": "login() (main.py:82-91) no limita los intentos fallidos, y registrar() acepta cualquier contraseña, incluso «1». Un script puede probar contraseñas comunes contra cualquier correo. Impacto 3: tomar cuentas con datos personales. Probabilidad 2: necesita conocer correos válidos, que T-05 facilita. Riesgo: impacto 3 × probabilidad 2 = 6.",
+                  "mitigation": "Bloqueo o espera progresiva tras varios intentos fallidos; contraseñas de mínimo 8 caracteres comparadas contra una lista de claves comunes. ASVS 5.0 V6 (autenticación).",
+                  "modelType": "STRIDE",
+                  "id": "ea581b65-a0b3-4d7d-bb2e-6e26b02cdfcc",
+                  "score": "6"
+                },
+                {
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "T-05 · El login revela si un correo está registrado",
+                  "type": "Information disclosure",
+                  "description": "login() responde «El usuario no existe» (404) si el correo no está y «Contraseña incorrecta» (401) si sí está (main.py:86-89). Así se puede saber qué correos de estudiantes tienen cuenta. Impacto 2: lista de usuarios para atacar con T-04. Probabilidad 3: basta mirar el mensaje. Riesgo: impacto 2 × probabilidad 3 = 6.",
+                  "mitigation": "El mismo mensaje y el mismo código para correo inexistente y contraseña incorrecta («Correo o contraseña incorrectos», 401). ASVS 5.0 V6.",
+                  "modelType": "STRIDE",
+                  "id": "76df1dda-07ef-4868-ad3e-bd25c07e3912",
+                  "score": "6"
+                },
+                {
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "T-06 · El registro devuelve el hash de la contraseña",
+                  "type": "Information disclosure",
+                  "description": "registrar() hace SELECT * y devuelve la fila completa (main.py:77-78), incluido el campo clave con el hash. Como el hash es MD5 sin sal (T-13), se puede revertir con tablas en línea. Impacto 2. Probabilidad 3: ocurre en cada registro. Riesgo: impacto 2 × probabilidad 3 = 6.",
+                  "mitigation": "Las respuestas solo devuelven los campos necesarios (id, nombre, correo, rol), nunca la clave. ASVS 5.0 V15 (exposición de datos) y V4 (APIs).",
+                  "modelType": "STRIDE",
+                  "id": "e3e73d99-88f9-48c9-91d8-5e47a623b317",
+                  "score": "6"
+                }
+              ],
+              "hasOpenThreats": true
+            }
+          },
+          {
+            "position": {
+              "x": 410,
+              "y": 170
+            },
+            "size": {
+              "width": 140,
+              "height": 140
+            },
+            "attrs": {
+              "text": {
+                "text": "API PrestaUCP\n(equipos y préstamos)"
+              },
+              "body": {
+                "stroke": "red",
+                "strokeWidth": 2.5,
+                "strokeDasharray": ""
+              }
+            },
+            "visible": true,
+            "shape": "process",
+            "zIndex": 5,
+            "ports": {
+              "groups": {
+                "top": {
+                  "position": "top",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "right": {
+                  "position": "right",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "bottom": {
+                  "position": "bottom",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "left": {
+                  "position": "left",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                }
+              },
+              "items": [
+                {
+                  "group": "top",
+                  "id": "8dd34cde-2f4d-44fa-8fda-998f1ab4f223"
+                },
+                {
+                  "group": "right",
+                  "id": "84bc7977-f746-4ab9-a898-baeda0f9ba9d"
+                },
+                {
+                  "group": "bottom",
+                  "id": "e3136bfa-8deb-489a-b6e3-bcc69238fab4"
+                },
+                {
+                  "group": "left",
+                  "id": "0998ce2a-9bb1-4130-bb05-b9eeb67f1b01"
+                }
+              ]
+            },
+            "id": "f36e46be-51a1-42ca-af65-5eb232e78421",
+            "data": {
+              "name": "API PrestaUCP\n(equipos y préstamos)",
+              "description": "main.py: GET/POST /equipos, POST/GET /prestamos, GET /prestamos/{id}, POST /prestamos/{id}/devolver. Valida el token con usuario_actual() (auth.py:27).",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "T-07 · BOLA: un estudiante ve el préstamo de otro con sus datos personales",
+                  "type": "Information disclosure",
+                  "description": "ver_prestamo() pide token pero consulta solo por WHERE p.id = ? (main.py:166-182). Ana pide /prestamos/2 y recibe el préstamo de Beto con su documento, correo y teléfono. Impacto 3: datos personales de cualquier estudiante (Ley 1581). Probabilidad 3: los ids son consecutivos. Riesgo: impacto 3 × probabilidad 3 = 9.",
+                  "mitigation": "La consulta filtra por el dueño (o permite todo solo al rol admin); un préstamo ajeno responde 404 igual que uno inexistente. ASVS 5.0 V8 (autorización).",
+                  "modelType": "STRIDE",
+                  "id": "00918f16-61c9-4dd0-b0ff-eca5dd7377ab",
+                  "score": "9"
+                },
+                {
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "T-08 · Cualquier estudiante registra devoluciones, incluso de préstamos ajenos",
+                  "type": "Elevation of privilege",
+                  "description": "devolver() solo exige un token válido (main.py:186-199), no el rol admin. Un estudiante puede marcar como devuelto un equipo que todavía tiene en la mano, y el equipo vuelve a aparecer disponible. Impacto 3: el inventario deja de ser confiable y se pueden perder equipos. Probabilidad 3: un POST con cualquier token. Riesgo: impacto 3 × probabilidad 3 = 9.",
+                  "mitigation": "POST /prestamos/{id}/devolver exige el rol admin con solo_admin, igual que POST /equipos; un estudiante recibe 403. ASVS 5.0 V8 (autorización por función).",
+                  "modelType": "STRIDE",
+                  "id": "18185966-8a2d-4863-954e-62f38ff3f5cb",
+                  "score": "9"
+                },
+                {
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "T-09 · El estudiante decide cuántos días dura el préstamo (lógica de negocio)",
+                  "type": "Tampering",
+                  "description": "PrestamoNuevo tiene dias: int = 3 (main.py:58) y pedir_prestamo() usa ese valor sin tope (main.py:143). Con \"dias\": 365 el préstamo vence en un año, y con un número negativo vence antes de empezar. La regla «máximo 3 días» solo existe en el README. Impacto 2: equipos retenidos por meses. Probabilidad 3: editar un número en el JSON. Riesgo: impacto 2 × probabilidad 3 = 6.",
+                  "mitigation": "El servidor fija la duración (máximo 3 días) e ignora o rechaza con 400 otro valor. ASVS 5.0 V2 (lógica de negocio).",
+                  "modelType": "STRIDE",
+                  "id": "f35d617a-fbfc-4594-b0c2-f422e82a59a6",
+                  "score": "6"
+                },
+                {
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "T-10 · Dos peticiones simultáneas se saltan el límite de préstamos (lógica de negocio)",
+                  "type": "Tampering",
+                  "description": "pedir_prestamo() revisa que el equipo esté disponible y que haya menos de 2 préstamos activos, y después inserta (main.py:125-151), sin una transacción que bloquee. Si llegan dos peticiones al mismo tiempo, las dos pasan las validaciones: el mismo equipo queda prestado a dos personas o un estudiante tiene 3 préstamos. Impacto 2. Probabilidad 2: requiere enviar peticiones en paralelo. Riesgo: impacto 2 × probabilidad 2 = 4.",
+                  "mitigation": "La validación y el cambio se hacen en una sola operación atómica (UPDATE equipos SET disponible = 0 WHERE id = ? AND disponible = 1 y revisar las filas afectadas, dentro de una transacción). ASVS 5.0 V2 (lógica de negocio).",
+                  "modelType": "STRIDE",
+                  "id": "6c865127-68a4-4a3d-a33c-6181aaab7212",
+                  "score": "4"
+                },
+                {
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "T-11 · Errores con traza completa y CORS abierto",
+                  "type": "Information disclosure",
+                  "description": "FastAPI(debug=True) (main.py:25) devuelve la traza de Python al cliente cuando algo falla, por ejemplo al registrar un correo repetido. Además, allow_origins=[\"*\"] (main.py:31) deja que cualquier sitio llame a la API desde el navegador. Impacto 2: rutas internas, versiones y estructura de la base. Probabilidad 3: basta provocar un error. Riesgo: impacto 2 × probabilidad 3 = 6.",
+                  "mitigation": "debug apagado, manejador de errores con mensaje genérico y lista blanca de orígenes en CORS. ASVS 5.0 V13 (configuración) y V16 (manejo de errores).",
+                  "modelType": "STRIDE",
+                  "id": "6a0096c3-5822-41e2-a211-790544d0cfba",
+                  "score": "6"
+                },
+                {
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "T-12 · Sin límite de peticiones ni paginación",
+                  "type": "Denial of service",
+                  "description": "No hay límite de peticiones por usuario o IP, /equipos devuelve todas las filas y /registro crea cuentas sin control. Un script puede crear miles de cuentas o saturar la API. Impacto 2: la app deja de responder para los estudiantes. Probabilidad 2. Riesgo: impacto 2 × probabilidad 2 = 4.",
+                  "mitigation": "Límite de peticiones por IP y por token (429), paginación con máximo en los listados y límite de tamaño en las peticiones. ASVS 5.0 V2 (anti-automatización) y V4.",
+                  "modelType": "STRIDE",
+                  "id": "9b36f526-f21f-42d6-9dac-4283d41342e8",
+                  "score": "4"
+                }
+              ],
+              "hasOpenThreats": true
+            }
+          },
+          {
+            "position": {
+              "x": 740,
+              "y": 170
+            },
+            "size": {
+              "width": 220,
+              "height": 100
+            },
+            "attrs": {
+              "text": {
+                "text": "SQLite presta.db\n(usuarios, equipos, préstamos)"
+              },
+              "topLine": {
+                "stroke": "red",
+                "strokeWidth": 2.5,
+                "strokeDasharray": ""
+              },
+              "bottomLine": {
+                "stroke": "red",
+                "strokeWidth": 2.5,
+                "strokeDasharray": ""
+              }
+            },
+            "visible": true,
+            "shape": "store",
+            "zIndex": 5,
+            "ports": {
+              "groups": {
+                "top": {
+                  "position": "top",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "right": {
+                  "position": "right",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "bottom": {
+                  "position": "bottom",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "left": {
+                  "position": "left",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                }
+              },
+              "items": [
+                {
+                  "group": "top",
+                  "id": "c8f5a17f-4130-4a39-8967-41df62d4670e"
+                },
+                {
+                  "group": "right",
+                  "id": "e4211e4c-125f-4daa-b0e6-ff72dbc5b8f7"
+                },
+                {
+                  "group": "bottom",
+                  "id": "c7159856-60d2-4488-a7a8-5a1781c9b57b"
+                },
+                {
+                  "group": "left",
+                  "id": "40b67752-1e52-4abb-b294-6d5bcd0dc6a8"
+                }
+              ]
+            },
+            "id": "a083ac46-9b1c-479b-b988-89fe925706c9",
+            "data": {
+              "name": "SQLite presta.db\n(usuarios, equipos, préstamos)",
+              "description": "db.py: la tabla usuarios guarda nombre, documento, correo, teléfono, hash de la clave y rol.",
+              "type": "tm.Store",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "T-13 · Contraseñas en MD5 sin sal y datos personales sin cifrar",
+                  "type": "Information disclosure",
+                  "description": "hash_clave() usa hashlib.md5 sin sal (auth.py:14-15), y el documento, el correo y el teléfono se guardan en texto plano en presta.db. Si la base se filtra (por ejemplo, con la inyección de T-14), las contraseñas se recuperan en segundos con tablas en línea. Impacto 3: cuentas y datos personales (Ley 1581). Probabilidad 2: hay que llegar a la base. Riesgo: impacto 3 × probabilidad 2 = 6.",
+                  "mitigation": "Contraseñas con Argon2id o bcrypt con sal; cifrado de los datos personales o del volumen; acceso a la base solo desde la API. ASVS 5.0 V11 (criptografía) y V14 (protección de datos).",
+                  "modelType": "STRIDE",
+                  "id": "43923b83-9a45-4034-b00f-95edcec95edc",
+                  "score": "6"
+                }
+              ],
+              "hasOpenThreats": true,
+              "isALog": false,
+              "storesCredentials": true,
+              "isEncrypted": false,
+              "isSigned": false
+            }
+          },
+          {
+            "position": {
+              "x": 740,
+              "y": 500
+            },
+            "size": {
+              "width": 220,
+              "height": 90
+            },
+            "attrs": {
+              "text": {
+                "text": "Logs del servidor\n(uvicorn, stdout del contenedor)"
+              },
+              "topLine": {
+                "stroke": "red",
+                "strokeWidth": 2.5,
+                "strokeDasharray": ""
+              },
+              "bottomLine": {
+                "stroke": "red",
+                "strokeWidth": 2.5,
+                "strokeDasharray": ""
+              }
+            },
+            "visible": true,
+            "shape": "store",
+            "zIndex": 5,
+            "ports": {
+              "groups": {
+                "top": {
+                  "position": "top",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "right": {
+                  "position": "right",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "bottom": {
+                  "position": "bottom",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                },
+                "left": {
+                  "position": "left",
+                  "attrs": {
+                    "circle": {
+                      "r": 4,
+                      "magnet": true,
+                      "stroke": "#5F95FF",
+                      "strokeWidth": 1,
+                      "fill": "#fff",
+                      "style": {
+                        "visibility": "hidden"
+                      }
+                    }
+                  }
+                }
+              },
+              "items": [
+                {
+                  "group": "top",
+                  "id": "bde4aaa2-2e88-48df-ab88-633f6c6810eb"
+                },
+                {
+                  "group": "right",
+                  "id": "53df8a4a-39fa-4613-9104-424b39b33414"
+                },
+                {
+                  "group": "bottom",
+                  "id": "24846173-af57-4858-9d65-e29733c8962b"
+                },
+                {
+                  "group": "left",
+                  "id": "ee384989-c7d6-45c4-8961-173b28ba4b9d"
+                }
+              ]
+            },
+            "id": "0f4602b7-2fe1-4405-96a5-a36c48ff094b",
+            "data": {
+              "name": "Logs del servidor\n(uvicorn, stdout del contenedor)",
+              "description": "Solo el log de acceso de uvicorn: método, ruta y código HTTP. No guarda quién hizo cada acción.",
+              "type": "tm.Store",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "T-16 · No queda registro de quién pidió o devolvió un préstamo",
+                  "type": "Repudiation",
+                  "description": "La app no registra eventos propios: el log de uvicorn no incluye el usuario. Si un préstamo aparece como devuelto (T-08) o alguien leyó datos ajenos (T-07), no hay forma de saber quién fue. Un estudiante puede negar que pidió un equipo. Impacto 2. Probabilidad 2. Riesgo: impacto 2 × probabilidad 2 = 4.",
+                  "mitigation": "Registrar los eventos de seguridad y de negocio (login fallido, préstamo, devolución, 403 y 404 de autorización) con usuario, fecha y resultado, sin contraseñas ni tokens. ASVS 5.0 V16 (registro).",
+                  "modelType": "STRIDE",
+                  "id": "f247e845-2115-4cc3-8051-d276078a1616",
+                  "score": "4"
+                }
+              ],
+              "hasOpenThreats": true,
+              "isALog": true,
+              "storesCredentials": false,
+              "isEncrypted": false,
+              "isSigned": false
+            }
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "red",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "labels": [
+              {
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "attrs": {
+                  "labelText": {
+                    "text": "Registro (nombre, documento, correo,\nteléfono, clave, rol) y login",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "position": 0.5
+              }
+            ],
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Registro (nombre, documento, correo,\nteléfono, clave, rol) y login",
+              "description": "Cruza L1. El JSON lo arma el cliente.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": true,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": true,
+              "protocol": "HTTP",
+              "threats": [
+                {
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "T-14 · Contraseñas, tokens y datos personales viajan sin cifrar",
+                  "type": "Information disclosure",
+                  "description": "La API se publica en HTTP (uvicorn en el puerto 8000, docker-compose.yml) sin TLS. En una red Wi-Fi del campus se pueden capturar la contraseña del login, el token y los datos personales del registro. Impacto 3. Probabilidad 2: hay que estar en la misma red. Riesgo: impacto 3 × probabilidad 2 = 6.",
+                  "mitigation": "Solo HTTPS (TLS 1.2 o 1.3) mediante un proxy delante de la API, redirección de HTTP a HTTPS y HSTS. ASVS 5.0 V12 (comunicación segura).",
+                  "modelType": "STRIDE",
+                  "id": "488de7ab-d5d5-40bb-90c6-6e970a34d29f",
+                  "score": "6"
+                }
+              ],
+              "isTrustBoundary": false
+            },
+            "id": "c1a00423-8f57-42c0-9354-84bc29e22cc2",
+            "source": {
+              "cell": "68bf0dce-30e1-4ab3-96bd-abd914be379d"
+            },
+            "target": {
+              "cell": "04572029-1970-4e77-be87-415057b7de4e"
+            },
+            "vertices": [
+              {
+                "x": 300,
+                "y": 560
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "labels": [
+              {
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "attrs": {
+                  "labelText": {
+                    "text": "Token JWT / usuario creado\n(incluye el hash)",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "position": 0.5
+              }
+            ],
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Token JWT / usuario creado\n(incluye el hash)",
+              "description": "Cruza L1.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": true,
+              "protocol": "HTTP",
+              "threats": [],
+              "isTrustBoundary": false
+            },
+            "id": "18bb1560-9c88-4ad4-a33a-8db40cf47061",
+            "source": {
+              "cell": "04572029-1970-4e77-be87-415057b7de4e"
+            },
+            "target": {
+              "cell": "68bf0dce-30e1-4ab3-96bd-abd914be379d"
+            },
+            "vertices": [
+              {
+                "x": 300,
+                "y": 620
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "red",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "labels": [
+              {
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "attrs": {
+                  "labelText": {
+                    "text": "Búsqueda ?buscar= (sin token)",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "position": 0.5
+              }
+            ],
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Búsqueda ?buscar= (sin token)",
+              "description": "Cruza L1 sin autenticación.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": true,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": true,
+              "protocol": "HTTP",
+              "threats": [
+                {
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "T-17 · Inyección SQL en la búsqueda de equipos",
+                  "type": "Tampering",
+                  "description": "listar_equipos() arma la consulta con un f-string: f\"... WHERE nombre LIKE '%{buscar}%'\" (main.py:108). Con ?buscar=' UNION SELECT id, correo, clave, rol FROM usuarios-- la respuesta trae los correos, los hashes y los roles de todos los usuarios. Impacto 3: lectura de toda la base. Probabilidad 3: un parámetro de URL, sin token. Riesgo: impacto 3 × probabilidad 3 = 9.",
+                  "mitigation": "Consultas parametrizadas en todo acceso a datos; en la búsqueda el % va dentro del parámetro (LIKE ?). ASVS 5.0 V1 (codificación y sanitización).",
+                  "modelType": "STRIDE",
+                  "id": "6119675c-65a2-4e5e-aeff-e818182ac4bb",
+                  "score": "9"
+                }
+              ],
+              "isTrustBoundary": false
+            },
+            "id": "c13b22c0-2e81-418a-9216-f6f65029086e",
+            "source": {
+              "cell": "68bf0dce-30e1-4ab3-96bd-abd914be379d"
+            },
+            "target": {
+              "cell": "f36e46be-51a1-42ca-af65-5eb232e78421"
+            },
+            "vertices": [
+              {
+                "x": 320,
+                "y": 400
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "labels": [
+              {
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "attrs": {
+                  "labelText": {
+                    "text": "Token, equipo_id y días del préstamo,\nid del préstamo, devolución",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "position": 0.5
+              }
+            ],
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Token, equipo_id y días del préstamo,\nid del préstamo, devolución",
+              "description": "Cruza L1. El token, los ids y los días los controla el cliente.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": true,
+              "protocol": "HTTP",
+              "threats": [],
+              "isTrustBoundary": false
+            },
+            "id": "37bc4e79-3c6d-4cc1-90e2-ea9bea994218",
+            "source": {
+              "cell": "1ba94391-a961-4f18-8673-d5aad6b72048"
+            },
+            "target": {
+              "cell": "f36e46be-51a1-42ca-af65-5eb232e78421"
+            },
+            "vertices": [
+              {
+                "x": 300,
+                "y": 300
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "labels": [
+              {
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "attrs": {
+                  "labelText": {
+                    "text": "Préstamos con datos personales,\ncatálogo de equipos",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "position": 0.5
+              }
+            ],
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Préstamos con datos personales,\ncatálogo de equipos",
+              "description": "Cruza L1.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": true,
+              "protocol": "HTTP",
+              "threats": [],
+              "isTrustBoundary": false
+            },
+            "id": "6ae9d2d1-d9ec-43e0-9d80-8b4b6861fa95",
+            "source": {
+              "cell": "f36e46be-51a1-42ca-af65-5eb232e78421"
+            },
+            "target": {
+              "cell": "1ba94391-a961-4f18-8673-d5aad6b72048"
+            },
+            "vertices": [
+              {
+                "x": 300,
+                "y": 360
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "labels": [
+              {
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "attrs": {
+                  "labelText": {
+                    "text": "Token admin, equipo nuevo,\ndevoluciones",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "position": 0.5
+              }
+            ],
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Token admin, equipo nuevo,\ndevoluciones",
+              "description": "Cruza L1.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": true,
+              "protocol": "HTTP",
+              "threats": [],
+              "isTrustBoundary": false
+            },
+            "id": "56770ce7-2d13-408a-bb42-8f4b70a371d8",
+            "source": {
+              "cell": "0db891ef-502f-478f-8125-147b2e999804"
+            },
+            "target": {
+              "cell": "f36e46be-51a1-42ca-af65-5eb232e78421"
+            },
+            "vertices": [
+              {
+                "x": 300,
+                "y": 120
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "labels": [
+              {
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "attrs": {
+                  "labelText": {
+                    "text": "Usuarios: insertar y buscar por correo",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "position": 0.5
+              }
+            ],
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Usuarios: insertar y buscar por correo",
+              "description": "Cruza L2.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "protocol": "SQLite (archivo local)",
+              "threats": [],
+              "isTrustBoundary": false
+            },
+            "id": "a3cabe52-0223-4db6-bc72-0ad33a4a7889",
+            "source": {
+              "cell": "04572029-1970-4e77-be87-415057b7de4e"
+            },
+            "target": {
+              "cell": "a083ac46-9b1c-479b-b988-89fe925706c9"
+            },
+            "vertices": [
+              {
+                "x": 700,
+                "y": 420
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "labels": [
+              {
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "attrs": {
+                  "labelText": {
+                    "text": "Consultas de equipos y préstamos",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "position": 0.5
+              }
+            ],
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Consultas de equipos y préstamos",
+              "description": "Cruza L2.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "protocol": "SQLite (archivo local)",
+              "threats": [],
+              "isTrustBoundary": false
+            },
+            "id": "97f5ada3-133b-4bd7-9446-7b0a530760aa",
+            "source": {
+              "cell": "f36e46be-51a1-42ca-af65-5eb232e78421"
+            },
+            "target": {
+              "cell": "a083ac46-9b1c-479b-b988-89fe925706c9"
+            },
+            "vertices": [
+              {
+                "x": 700,
+                "y": 220
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "strokeDasharray": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "labels": [
+              {
+                "markup": [
+                  {
+                    "tagName": "ellipse",
+                    "selector": "labelBody"
+                  },
+                  {
+                    "tagName": "text",
+                    "selector": "labelText"
+                  }
+                ],
+                "attrs": {
+                  "labelText": {
+                    "text": "Líneas de acceso (método, ruta, código)",
+                    "textAnchor": "middle",
+                    "textVerticalAnchor": "middle"
+                  },
+                  "labelBody": {
+                    "ref": "labelText",
+                    "refRx": "50%",
+                    "refRy": "60%",
+                    "fill": "#fff",
+                    "strokeWidth": 0
+                  }
+                },
+                "position": 0.5
+              }
+            ],
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Flow",
+              "name": "Líneas de acceso (método, ruta, código)",
+              "description": "Cruza L2.",
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "hasOpenThreats": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "protocol": "stdout del contenedor",
+              "threats": [],
+              "isTrustBoundary": false
+            },
+            "id": "afb5e60a-fda8-4edd-8c0b-0161127cc552",
+            "source": {
+              "cell": "f36e46be-51a1-42ca-af65-5eb232e78421"
+            },
+            "target": {
+              "cell": "0f4602b7-2fe1-4405-96a5-a36c48ff094b"
+            },
+            "vertices": [
+              {
+                "x": 700,
+                "y": 420
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "diagramTop": 1,
+    "reviewer": "",
+    "threatTop": 0
+  }
+}
