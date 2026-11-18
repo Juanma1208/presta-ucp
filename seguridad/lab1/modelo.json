@@ -873,7 +873,7 @@
                   "severity": "Medium",
                   "title": "T-13 · Contraseñas en MD5 sin sal y datos personales sin cifrar",
                   "type": "Information disclosure",
-                  "description": "hash_clave() usa hashlib.md5 sin sal (auth.py:14-15), y el documento, el correo y el teléfono se guardan en texto plano en presta.db. Si la base se filtra (por ejemplo, con la inyección de T-14), las contraseñas se recuperan en segundos con tablas en línea. Impacto 3: cuentas y datos personales (Ley 1581). Probabilidad 2: hay que llegar a la base. Riesgo: impacto 3 × probabilidad 2 = 6.",
+                  "description": "hash_clave() usa hashlib.md5 sin sal (auth.py:14-15), y el documento, el correo y el teléfono se guardan en texto plano en presta.db. Si la base se filtra (por ejemplo, con la inyección SQL de T-17), las contraseñas se recuperan en segundos con tablas en línea. Impacto 3: cuentas y datos personales (Ley 1581). Probabilidad 2: hay que llegar a la base. Riesgo: impacto 3 × probabilidad 2 = 6.",
                   "mitigation": "Contraseñas con Argon2id o bcrypt con sal; cifrado de los datos personales o del volumen; acceso a la base solo desde la API. ASVS 5.0 V11 (criptografía) y V14 (protección de datos).",
                   "modelType": "STRIDE",
                   "id": "43923b83-9a45-4034-b00f-95edcec95edc",
