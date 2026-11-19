@@ -1,0 +1,13 @@
+# Log de la app durante el primer intento de ZAP (escaneo activo con varios hilos).
+# La app registró errores 'database is locked' porque las conexiones a SQLite no se cierran al fallar una petición.
+# Total de errores 'database is locked': 364
+
+402:sqlite3.OperationalError: database is locked
+475:sqlite3.OperationalError: database is locked
+548:sqlite3.OperationalError: database is locked
+621:sqlite3.OperationalError: database is locked
+767:sqlite3.OperationalError: database is locked
+839:sqlite3.OperationalError: database is locked
+913:sqlite3.OperationalError: database is locked
+1066:sqlite3.OperationalError: database is locked
+...

@@ -1,0 +1,58 @@
+# Semgrep · 2026-11-17 23:31:38 -0500 · commit 03dd6db
+               
+               
+┌─────────────┐
+│ Scan Status │
+└─────────────┘
+  Scanning 10 files tracked by git with 207 Code rules:
+                                                                                                                        
+  Language      Rules   Files          Origin      Rules                                                                
+ ─────────────────────────────        ───────────────────                                                               
+  <multilang>      37      10          Community     207                                                                
+  python           55       4                                                                                           
+  yaml              7       1                                                                                           
+  dockerfile        3       1                                                                                           
+                                                                                                                        
+                
+                
+┌──────────────┐
+│ Scan Summary │
+└──────────────┘
+✅ Scan completed successfully.
+ • Findings: 2 (2 blocking)
+ • Rules run: 102
+ • Targets scanned: 10
+ • Parsed lines: ~100.0%
+ • Scan skipped: 
+   ◦ Matching --exclude patterns: 8
+   ◦ Files matching .semgrepignore patterns: 2
+ • Scan was limited to files tracked by git
+ • For a detailed list of skipped files and lines, run semgrep with the --verbose flag
+Ran 102 rules on 10 files: 2 findings.
+                   
+                   
+┌─────────────────┐
+│ 2 Code Findings │
+└─────────────────┘
+              
+    Dockerfile
+   ❯❯❱ dockerfile.security.missing-user.missing-user
+          ❰❰ Blocking ❱❱
+          By not specifying a USER, a program in the container may run as 'root'. This is a security hazard.
+          If an attacker can control a process running as root, they may have control over the container.   
+          Ensure that the last USER in a Dockerfile is a USER other than 'root'.                            
+          Details: https://sg.run/Gbvn                                                                      
+                                                                                                            
+           ▶▶┆ Autofix ▶ USER non-root CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+            9┆ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+               
+    app/auth.py
+   ❯❯❱ python.jwt.security.jwt-hardcode.jwt-python-hardcoded-secret
+          ❰❰ Blocking ❱❱
+          Hardcoded JWT secret or private key is used. This is a Insufficiently Protected Credentials     
+          weakness: https://cwe.mitre.org/data/definitions/522.html Consider using an appropriate security
+          mechanism to protect the credentials (e.g. keeping secrets in environment variables)            
+          Details: https://sg.run/l2E9                                                                    
+                                                                                                          
+           24┆ return jwt.encode(datos, SECRET_KEY, algorithm=ALGORITMO)
+
