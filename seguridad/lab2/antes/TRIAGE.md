@@ -101,17 +101,38 @@ Las dos herramientas **se complementan, no se repiten**. SAST encuentra lo que s
 
 ## Después de las correcciones (rama `lab2/top5-correcciones`)
 
-Se repitieron los dos escaneos con los mismos comandos sobre el commit `bc09098`. Los comandos quedaron escritos al inicio de `despues/evidencias/semgrep.txt` y `despues/evidencias/zap.txt`.
+Se repitieron los dos escaneos con los mismos comandos sobre el commit `4d9c740`, que incluye el top 5 (`bc09098`) y la corrección de los hallazgos de Semgrep y ZAP. Los comandos quedaron escritos al inicio de `despues/evidencias/semgrep.txt` y `despues/evidencias/zap.txt`.
 
-| Herramienta | Antes (`main`, `bdf1baa`) | Después (`bc09098`) | Evidencia |
+| Herramienta | Antes (`main`, `bdf1baa`) | Después (`4d9c740`) | Evidencia |
 |---|---|---|---|
-| Semgrep (SARIF) | 4: `jwt-python-hardcoded-secret`, `missing-user`, `insecure-hash-algorithm-md5`, `wildcard-cors` | **3**: desaparece `jwt-python-hardcoded-secret`. Siguen `missing-user` (`Dockerfile:9`), `insecure-hash-algorithm-md5` (ahora en `app/auth.py:22`) y `wildcard-cors` (`app/main.py:31`) | `despues/evidencias/semgrep.txt`, `despues/evidencias/semgrep.sarif` |
-| ZAP baseline | WARN 9 · PASS 59 (3 Medium: CSP, clickjacking, SRI) | **Sin cambios**: WARN 9 · PASS 59, las mismas alertas | `despues/evidencias/zap.txt`, `despues/evidencias/zap.html` |
+| Semgrep (SARIF) | 4: `jwt-python-hardcoded-secret`, `missing-user`, `insecure-hash-algorithm-md5`, `wildcard-cors` | **0** | `despues/evidencias/semgrep.txt`, `despues/evidencias/semgrep.sarif` |
+| ZAP baseline | WARN 9 · PASS 59: 3 Medium (CSP, clickjacking, SRI), 6 Low y 2 Informational | **WARN 3 · PASS 65**: 0 Medium, 1 Low y 3 Informational | `despues/evidencias/zap.txt`, `despues/evidencias/zap.html` |
 
-- **Semgrep confirma una sola de las cinco correcciones.** El secreto del JWT era la única falla del top 5 que Semgrep veía, y es la única que desaparece. Las otras cuatro (inyección SQL, rol, BOLA y devolución) nunca aparecieron en Semgrep, así que su corrección solo se puede comprobar con las pruebas y los `curl`.
-- **Las pruebas no generaron falsos positivos nuevos.** `tests/test_lab2_top5.py` firma un token con `"presta-ucp-2026"` para comprobar que se rechaza, pero Semgrep no lo marcó como secreto en el código.
-- **ZAP no cambia, y es lo esperado.** Sus alertas son de cabeceras de `/docs`, y el top 5 no las tocaba. Siguen abiertas en la fila 19 de ASVS.
+Qué corrigió cada hallazgo:
+
+| Hallazgo del antes | Corrección | Commit |
+|---|---|---|
+| Semgrep `jwt-python-hardcoded-secret` | El secreto se lee de `JWT_SECRET` (`.env`, fuera de git) | `bc09098` |
+| Semgrep `insecure-hash-algorithm-md5` | PBKDF2-HMAC-SHA256 con 600.000 iteraciones y sal | `4d9c740` |
+| Semgrep `wildcard-cors` | Lista blanca `CORS_ORIGENES`, vacía por defecto | `4d9c740` |
+| Semgrep `missing-user` | `USER app` (uid 10001) en el `Dockerfile` | `4d9c740` |
+| ZAP CSP [10038], clickjacking [10020], `nosniff` [10021], Permissions-Policy [10063], COEP/COOP/CORP [90004] | Middleware `cabeceras_de_seguridad` en `app/main.py` | `4d9c740` |
+| ZAP SRI [90003] y scripts de otro dominio [10017] | Swagger UI 5.34.1 servido desde `/static/swagger/` en lugar del CDN, sin `<script>` en línea | `4d9c740` |
+| ZAP Storable and Cacheable [10049] en `/docs` y la API | `Cache-Control: no-store` | `4d9c740` |
+
+### Alertas de ZAP en el después
+
+| Alerta ZAP | Riesgo | ¿Verdadero o falso positivo? | Por qué | Fila ASVS |
+|---|---|---|---|---|
+| Timestamp Disclosure - Unix [10096] | Low | **Falso positivo** | Apareció al servir Swagger UI desde la app. El «timestamp» `1518500249` está dentro de `swagger-ui-bundle.js` y es `0x5A827999`, una constante del algoritmo SHA-1, no una fecha del servidor | — |
+| Non-Storable Content [10049] | Informational | Falso positivo, es el efecto esperado de un control | Aparece porque se agregó `Cache-Control: no-store` a propósito, para que ni el navegador ni un proxy guarden respuestas con datos personales | 16, 19 |
+| Storable and Cacheable Content [10049] | Informational | Falso positivo | Ahora solo aparece en los archivos de `/static/swagger/` (JavaScript, CSS e ícono), que son públicos y deben poder guardarse en caché | — |
+| Modern Web Application [10109] | Informational | Falso positivo | Solo informa que `/docs` usa JavaScript | — |
+
+- **Semgrep confirma 4 de las correcciones**, pero no las del top 5 que nunca vio: la inyección SQL, el rol, BOLA y la devolución solo se pueden comprobar con las pruebas y los `curl`.
+- **Las pruebas no generaron falsos positivos nuevos en Semgrep.** `tests/test_lab2_top5.py` firma un token con `"presta-ucp-2026"` para comprobar que se rechaza, y Semgrep no lo marcó.
+- **Corregir abrió una alerta nueva.** La alerta `Timestamp Disclosure` no existía antes: aparece porque ahora el JavaScript de Swagger lo sirve la app y ZAP lo revisa como contenido propio.
 
 ### Lo que los escaneos siguen sin poder ver
 
-Ninguno de los dos escaneos del después prueba BOLA, el rol del registro, la devolución sin admin ni la inyección SQL. Esas correcciones se verificaron con `tests/test_lab2_top5.py` (antes fallaban 9 de 13; ahora pasan las 26 de la suite) y con `despues/evidencias/curl.txt`.
+Ninguno de los dos escaneos del después prueba BOLA, el rol del registro, la devolución sin admin ni la inyección SQL. Esas correcciones se verificaron con `tests/test_lab2_top5.py` y con `despues/evidencias/curl.txt`. Tampoco ven lo que sigue pendiente en ASVS (límite de intentos, enumeración de usuarios, días del préstamo, registro de eventos).
