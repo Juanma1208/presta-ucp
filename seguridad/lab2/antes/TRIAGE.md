@@ -1,4 +1,4 @@
-# Lab 2 · Triage SAST y DAST · PrestaUCP (estado inicial)
+# Lab 2 · Triage SAST y DAST · PrestaUCP
 
 ## SAST: Semgrep
 
@@ -99,6 +99,19 @@ La inyección SQL es el caso más llamativo, porque es una falla técnica clási
 
 Las dos herramientas **se complementan, no se repiten**. SAST encuentra lo que se ve en el código (secretos, algoritmos, configuración escrita) y DAST lo que se ve con la app corriendo (cabeceras, páginas generadas por la librería y el comportamiento bajo carga). Lo que depende del negocio solo lo encuentra una persona. Con más configuración, cada una podría cubrir parte de lo que ve la otra: un escaneo activo de ZAP con token (`zap-api-scan.py` sobre `/openapi.json`), una vez corregido el bloqueo de SQLite, probablemente detectaría la inyección SQL y la traza de Python, y una regla propia de Semgrep podría marcar los f-strings dentro de `con.execute()`. Aun así, ninguna de las dos detectaría BOLA, la asignación masiva del rol ni la devolución sin rol admin.
 
-## Después de las correcciones
+## Después de las correcciones (rama `lab2/top5-correcciones`)
 
-> Pendiente: se completa en la etapa «después», repitiendo Semgrep y ZAP con los mismos comandos sobre la versión corregida y comparando los resultados (`despues/evidencias/`).
+Se repitieron los dos escaneos con los mismos comandos sobre el commit `bc09098`. Los comandos quedaron escritos al inicio de `despues/evidencias/semgrep.txt` y `despues/evidencias/zap.txt`.
+
+| Herramienta | Antes (`main`, `bdf1baa`) | Después (`bc09098`) | Evidencia |
+|---|---|---|---|
+| Semgrep (SARIF) | 4: `jwt-python-hardcoded-secret`, `missing-user`, `insecure-hash-algorithm-md5`, `wildcard-cors` | **3**: desaparece `jwt-python-hardcoded-secret`. Siguen `missing-user` (`Dockerfile:9`), `insecure-hash-algorithm-md5` (ahora en `app/auth.py:22`) y `wildcard-cors` (`app/main.py:31`) | `despues/evidencias/semgrep.txt`, `despues/evidencias/semgrep.sarif` |
+| ZAP baseline | WARN 9 · PASS 59 (3 Medium: CSP, clickjacking, SRI) | **Sin cambios**: WARN 9 · PASS 59, las mismas alertas | `despues/evidencias/zap.txt`, `despues/evidencias/zap.html` |
+
+- **Semgrep confirma una sola de las cinco correcciones.** El secreto del JWT era la única falla del top 5 que Semgrep veía, y es la única que desaparece. Las otras cuatro (inyección SQL, rol, BOLA y devolución) nunca aparecieron en Semgrep, así que su corrección solo se puede comprobar con las pruebas y los `curl`.
+- **Las pruebas no generaron falsos positivos nuevos.** `tests/test_lab2_top5.py` firma un token con `"presta-ucp-2026"` para comprobar que se rechaza, pero Semgrep no lo marcó como secreto en el código.
+- **ZAP no cambia, y es lo esperado.** Sus alertas son de cabeceras de `/docs`, y el top 5 no las tocaba. Siguen abiertas en la fila 19 de ASVS.
+
+### Lo que los escaneos siguen sin poder ver
+
+Ninguno de los dos escaneos del después prueba BOLA, el rol del registro, la devolución sin admin ni la inyección SQL. Esas correcciones se verificaron con `tests/test_lab2_top5.py` (antes fallaban 9 de 13; ahora pasan las 26 de la suite) y con `despues/evidencias/curl.txt`.

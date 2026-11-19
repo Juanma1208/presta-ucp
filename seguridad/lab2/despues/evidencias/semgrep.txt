@@ -1,0 +1,66 @@
+# Semgrep · 2026-11-19 00:03:15 -0500 · commit bc09098
+$ semgrep scan --config p/python --config p/secrets --config p/owasp-top-ten --exclude seguridad --exclude .venv --metrics=off
+               
+               
+┌─────────────┐
+│ Scan Status │
+└─────────────┘
+  Scanning 11 files tracked by git with 599 Code rules:
+                                                                                                                        
+  Language      Rules   Files          Origin      Rules                                                                
+ ─────────────────────────────        ───────────────────                                                               
+  <multilang>      39      11          Community     599                                                                
+  python          151       4                                                                                           
+  yaml             24       1                                                                                           
+  dockerfile        4       1                                                                                           
+                                                                                                                        
+                
+                
+┌──────────────┐
+│ Scan Summary │
+└──────────────┘
+✅ Scan completed successfully.
+ • Findings: 3 (3 blocking)
+ • Rules run: 218
+ • Targets scanned: 11
+ • Parsed lines: ~100.0%
+ • Scan skipped: 
+   ◦ Matching --exclude patterns: 30
+   ◦ Files matching .semgrepignore patterns: 3
+ • Scan was limited to files tracked by git
+ • For a detailed list of skipped files and lines, run semgrep with the --verbose flag
+Ran 218 rules on 11 files: 3 findings.
+                   
+                   
+┌─────────────────┐
+│ 3 Code Findings │
+└─────────────────┘
+              
+    Dockerfile
+   ❯❯❱ dockerfile.security.missing-user.missing-user
+          ❰❰ Blocking ❱❱
+          By not specifying a USER, a program in the container may run as 'root'. This is a security hazard.
+          If an attacker can control a process running as root, they may have control over the container.   
+          Ensure that the last USER in a Dockerfile is a USER other than 'root'.                            
+          Details: https://sg.run/Gbvn                                                                      
+                                                                                                            
+           ▶▶┆ Autofix ▶ USER non-root CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+            9┆ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+               
+    app/auth.py
+    ❯❱ python.lang.security.insecure-hash-algorithms-md5.insecure-hash-algorithm-md5
+          ❰❰ Blocking ❱❱
+          Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is
+          therefore not suitable as a cryptographic signature. Use SHA256 or SHA3 instead.               
+          Details: https://sg.run/vYrY                                                                   
+                                                                                                         
+           22┆ return hashlib.md5(clave.encode()).hexdigest()
+               
+    app/main.py
+    ❯❱ python.fastapi.security.wildcard-cors.wildcard-cors
+          ❰❰ Blocking ❱❱
+          CORS policy allows any origin (using wildcard '*'). This is insecure and should be avoided.
+          Details: https://sg.run/KxApY                                                              
+                                                                                                     
+           31┆ allow_origins=["*"],
+

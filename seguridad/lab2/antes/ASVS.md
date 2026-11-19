@@ -1,8 +1,8 @@
-# Lab 2 · Verificación ASVS 5.0 · PrestaUCP (estado inicial)
+# Lab 2 · Verificación ASVS 5.0 · PrestaUCP
 
 - **Aplicación:** PrestaUCP (FastAPI + SQLite + PyJWT), el proyecto del equipo. Corre en `127.0.0.1:8000` con `docker compose up -d --build`.
 - **Referencias:** las rutas `app/...:N` son relativas a la raíz del repositorio. Los logs están en `antes/evidencias/` y se citan como `ev`.
-- **Niveles:** cada requisito lleva su nivel de ASVS 5.0 entre paréntesis. Esta tabla describe la app **antes** de cualquier corrección.
+- **Niveles:** cada requisito lleva su nivel de ASVS 5.0 entre paréntesis. La primera tabla describe la app **antes** de cualquier corrección; la segunda, el estado **después** de corregir el top 5.
 
 | # | Capítulo | Qué verificar | Requisito ASVS | Estado | Evidencia |
 |---|---|---|---|---|---|
@@ -34,12 +34,32 @@
 
 **Resumen del estado inicial:** 0 Cumple · 1 Cumple en parte · 2 No aplica · 22 No cumple.
 
-## Estado después de las correcciones
+## Estado después de las correcciones (rama `lab2/top5-correcciones`)
 
-> Pendiente: se completa en la etapa «después». La tabla tendrá las columnas `# · Requisito · Antes · Después · Control y evidencia`, con una fila por cada requisito que cambie. El antes y el después se obtienen con los mismos comandos (`antes/evidencias/curl.txt` y `despues/evidencias/curl.txt`, generados con `verificar.sh`).
+La tabla anterior muestra la app como estaba en `main` (commit `bdf1baa`). Esta tabla muestra cómo quedó cada fila que cambió con el commit `bc09098`. El antes y el después se obtuvieron con los mismos comandos: `verificar.sh` (`antes/evidencias/curl.txt` y `despues/evidencias/curl.txt`) y `pytest` (`antes/evidencias/pytest.txt` y `despues/evidencias/pytest.txt`). Las pruebas nuevas están en `tests/test_lab2_top5.py`: con el código original fallan 9 de 13, y con las correcciones pasan las 26 de la suite.
+
+| # | Requisito | Antes | Después | Control y evidencia |
+|---|---|---|---|---|
+| 5 | 7.2.2, 7.4.1 | No cumple | Parcial | Los tokens ahora vencen a los 60 minutos (`exp`, `app/auth.py`). Todavía no hay cierre de sesión que invalide el token en el servidor |
+| 7 | 9.1.2 | Cumple en parte | **Cumple** | `jwt.decode` sigue con `algorithms=["HS256"]`, y ahora el secreto ya no es público (fila 17), así que la firma sí protege el token |
+| 8 | 9.2.1 | No cumple | Parcial | El token trae `exp` (`despues/curl.txt`: `['exp', 'rol', 'sub']`) y `jwt.decode` lo exige con `options={"require": ["exp", "sub"]}`. Un token vencido o sin `exp` responde 401 (`test_t3_token_vencido_es_rechazado`, `test_t3_token_sin_exp_es_rechazado`). No se validan emisor ni audiencia porque la app emite y consume sus propios tokens |
+| 9 | 8.2.2 | No cumple | **Cumple** | `ver_prestamo` filtra con `WHERE p.id = ? AND (p.usuario_id = ? OR ? = 'admin')`. Ana pide `/prestamos/2` y recibe `{"detail":"Préstamo no encontrado"}`, igual que un préstamo inexistente (`despues/curl.txt`, `test_t4_*`) |
+| 10 | 15.3.3 | No cumple | **Cumple** | El modelo `Registro` ya no tiene `rol` y el `INSERT` guarda siempre `"estudiante"`. El registro con `"rol":"admin"` queda como estudiante y ese token recibe 403 en `POST /equipos` (`despues/curl.txt`, `test_t2_registro_ignora_el_rol_del_cliente`) |
+| 11 | 8.3.1 | No cumple | **Cumple** | `devolver` usa `Depends(solo_admin)`. Beto recibe 403 «Solo el administrador puede hacer esto» y el equipo sigue prestado (`despues/curl.txt`, `test_t5_*`) |
+| 14 | 1.2.4 | No cumple | **Cumple** | `listar_equipos` usa `LIKE ?` con el `%` dentro del parámetro. El `UNION` devuelve `[]` y una búsqueda con apóstrofo ya no da error (`despues/curl.txt`, `test_t1_*`). Todas las consultas de `app/` quedan parametrizadas |
+| 17 | 13.3.1 | No cumple | Parcial | El secreto se lee de `JWT_SECRET` (mínimo 32 bytes; la app no arranca sin él) y vive en `.env`, que está en `.gitignore`. Un token firmado con `presta-ucp-2026` recibe 401 (`despues/curl.txt`). El secreto viejo sigue en el historial de git, pero ya no es válido |
+| 21 | 1.2.4 (T1) | No cumple | **Cumple** | Igual que la fila 14 |
+| 22 | 15.3.3 (T2) | No cumple | **Cumple** | Igual que la fila 10 |
+| 23 | 13.3.1, 9.2.1 (T3) | No cumple | **Cumple** | Cumple el requisito escrito en el Lab 1: secreto del entorno, aleatorio, de al menos 32 bytes (`secrets.token_urlsafe(48)`), y tokens con `exp`. Las 4 pruebas `test_t3_*` pasan |
+| 24 | 8.2.2 (T4) | No cumple | **Cumple** | Igual que la fila 9 |
+| 25 | 8.3.1 (T5) | No cumple | **Cumple** | Igual que la fila 11 |
+
+Las filas 1, 2, 3, 4, 12, 13, 16, 18, 19 y 20 siguen en «No cumple», y la 6 y la 15 siguen como «No aplica». `despues/curl.txt` lo confirma: la contraseña «1» se acepta, el registro sigue devolviendo el hash MD5, el login sigue distinguiendo 404 de 401, el préstamo de 365 días se crea, y la respuesta sigue con `access-control-allow-origin: *` y la traza de Python.
+
+**Resumen después de las correcciones:** 10 Cumple · 3 Parcial · 2 No aplica · 10 No cumple.
 
 ## ¿Se hizo un buen trabajo? (sección 5)
 
-1. **Cumplimiento.** La versión revisada no cumple **ninguno de los 25** requisitos. Una fila cumple en parte (7: el algoritmo del JWT está fijo, pero el secreto está en el código), 2 no aplican (6 y 15) y 22 no se cumplen. *Pendiente: cuántos cumple después del PR y qué queda como riesgo residual.*
+1. **Cumplimiento.** La versión revisada no cumplía **ninguno de los 25** requisitos: una fila cumplía en parte (7), 2 no aplicaban (6 y 15) y 22 no se cumplían. Con las correcciones del top 5 cumple **10 de 25**, 3 quedan en parte (5, 8 y 17) y 10 siguen sin cumplirse. Lo pendiente es el riesgo residual: contraseñas débiles con MD5 (filas 1 y 2), sin límite de intentos (3), login que revela usuarios (4), el registro que devuelve el hash (12), los días del préstamo (13), datos personales sin cifrar (16), sin TLS (18), debug, CORS y cabeceras (19) y sin registro de eventos (20). En pruebas, se pasó de 17 de 26 a **26 de 26**.
 2. **Lo que solo encontró la revisión humana.** BOLA en `/prestamos/{id}` (Ana ve el documento y el teléfono de Beto), la asignación masiva del rol (cualquiera se registra como admin), la devolución de préstamos ajenos sin ser admin, los días del préstamo que fija el estudiante, el hash que devuelve el registro y el login que revela si el correo existe. Ni Semgrep ni ZAP marcaron ninguno, porque el código es válido y la respuesta es un 200 normal. Tampoco vieron la **inyección SQL** de `/equipos?buscar=`, a pesar de ser una falla técnica clásica: se encontró leyendo `app/main.py:108` y se confirmó con un `UNION` que devuelve correos y hashes. En el Lab 1 se esperaba que Semgrep la detectara con `tainted-sql-string` (verificación de T1), y no fue así: la herramienta prevista falló y la falla solo apareció con la revisión manual. También hubo un hallazgo que el Lab 1 no tenía: el bloqueo de SQLite (364 errores `database is locked`) que provocó el escaneo activo de ZAP.
 3. **El falso positivo que más tiempo costó** fue `Storable and Cacheable Content` de ZAP. Hubo que revisar qué páginas había escaneado para ver que eran públicas (`/docs`, `/openapi.json`) y que las respuestas con datos personales (`/prestamos`, `/me`) nunca llegaron al escaneo porque el baseline no tenía token. Semgrep no tuvo falsos positivos: sus 4 hallazgos son fallas reales. Lo que más tiempo costó en realidad fue el escaneo activo de ZAP, que dejó la base bloqueada con 364 errores `database is locked` y obligó a cambiar al baseline.
