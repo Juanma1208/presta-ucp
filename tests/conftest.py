@@ -5,6 +5,8 @@ from fastapi.testclient import TestClient
 
 # Secreto solo para las pruebas (la app exige JWT_SECRET de al menos 32 bytes).
 os.environ.setdefault("JWT_SECRET", "secreto-de-pruebas-que-no-se-usa-en-produccion")
+# Menos iteraciones de PBKDF2 solo para que las pruebas sean rápidas (la app usa 600.000).
+os.environ.setdefault("PBKDF2_ITERACIONES", "1000")
 
 
 @pytest.fixture

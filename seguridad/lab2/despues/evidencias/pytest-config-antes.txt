@@ -1,0 +1,428 @@
+# pytest · ANTES de corregir Semgrep/ZAP (commit e51c891) · 2026-11-19 00:13:55 -0500
+$ pytest -v tests/test_lab2_config.py
+============================= test session starts ==============================
+platform linux -- Python 3.14.4, pytest-9.2.0, pluggy-1.7.0 -- /home/juanm/presta-ucp/.venv/bin/python
+rootdir: /home/juanm/presta-ucp
+configfile: pytest.ini
+plugins: anyio-4.16.0
+collecting ... collected 11 items
+
+tests/test_lab2_config.py::test_fila2_la_clave_no_se_guarda_con_md5 FAILED [  9%]
+tests/test_lab2_config.py::test_fila2_la_misma_clave_da_hashes_distintos_por_la_sal FAILED [ 18%]
+tests/test_lab2_config.py::test_fila2_el_login_sigue_funcionando PASSED  [ 27%]
+tests/test_lab2_config.py::test_fila19_cors_no_acepta_un_origen_cualquiera FAILED [ 36%]
+tests/test_lab2_config.py::test_fila19_cabeceras_de_seguridad_en_la_api FAILED [ 45%]
+tests/test_lab2_config.py::test_fila19_las_respuestas_con_datos_personales_no_se_guardan_en_cache FAILED [ 54%]
+tests/test_lab2_config.py::test_fila19_docs_funciona_sin_scripts_de_otro_dominio FAILED [ 63%]
+tests/test_lab2_config.py::test_fila19_debug_apagado FAILED              [ 72%]
+tests/test_lab2_config.py::test_fila19_correo_repetido_responde_409_sin_traza FAILED [ 81%]
+tests/test_lab2_config.py::test_fila19_tras_un_error_la_base_no_queda_bloqueada FAILED [ 90%]
+tests/test_lab2_config.py::test_fila19_dockerfile_usa_un_usuario_sin_privilegios FAILED [100%]
+
+=================================== FAILURES ===================================
+___________________ test_fila2_la_clave_no_se_guarda_con_md5 ___________________
+
+    def test_fila2_la_clave_no_se_guarda_con_md5():
+        from app.auth import hash_clave
+    
+        h = hash_clave("1")
+>       assert h != "c4ca4238a0b923820dcc509a6f75849b"
+E       AssertionError: assert 'c4ca4238a0b923820dcc509a6f75849b' != 'c4ca4238a0b923820dcc509a6f75849b'
+
+tests/test_lab2_config.py:20: AssertionError
+___________ test_fila2_la_misma_clave_da_hashes_distintos_por_la_sal ___________
+
+    def test_fila2_la_misma_clave_da_hashes_distintos_por_la_sal():
+        from app.auth import hash_clave, verificar_clave
+    
+        a, b = hash_clave("ana12345"), hash_clave("ana12345")
+>       assert a != b
+E       AssertionError: assert 'e4e0bc2ca5e8b32f7f80be62097cb973' != 'e4e0bc2ca5e8b32f7f80be62097cb973'
+
+tests/test_lab2_config.py:28: AssertionError
+_______________ test_fila19_cors_no_acepta_un_origen_cualquiera ________________
+
+cliente = <starlette.testclient.TestClient object at 0x7f1e7de79810>
+
+    def test_fila19_cors_no_acepta_un_origen_cualquiera(cliente):
+        r = cliente.get("/salud", headers={"Origin": "https://malo.example"})
+>       assert "access-control-allow-origin" not in r.headers
+E       AssertionError: assert 'access-control-allow-origin' not in Headers({'content-length': '15', 'content-type': 'application/json', 'access-control-allow-origin': '*', 'vary': 'Origin'})
+E        +  where Headers({'content-length': '15', 'content-type': 'application/json', 'access-control-allow-origin': '*', 'vary': 'Origin'}) = <Response [200 OK]>.headers
+
+tests/test_lab2_config.py:43: AssertionError
+_________________ test_fila19_cabeceras_de_seguridad_en_la_api _________________
+
+cliente = <starlette.testclient.TestClient object at 0x7f1e7de7aad0>
+
+    def test_fila19_cabeceras_de_seguridad_en_la_api(cliente):
+        h = cliente.get("/salud").headers
+>       assert h["x-content-type-options"] == "nosniff"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_lab2_config.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Headers({'content-length': '15', 'content-type': 'application/json', 'vary': 'Origin'})
+key = 'x-content-type-options'
+
+    def __getitem__(self, key: str) -> str:
+        """
+        Return a single header value.
+    
+        If there are multiple headers with the same key, then we concatenate
+        them with commas. See: https://tools.ietf.org/html/rfc7230#section-3.2.2
+        """
+        normalized_key = key.lower().encode(self.encoding)
+    
+        items = [
+            header_value.decode(self.encoding)
+            for _, header_key, header_value in self._list
+            if header_key == normalized_key
+        ]
+    
+        if items:
+            return ", ".join(items)
+    
+>       raise KeyError(key)
+E       KeyError: 'x-content-type-options'
+
+.venv/lib/python3.14/site-packages/httpx/_models.py:302: KeyError
+____ test_fila19_las_respuestas_con_datos_personales_no_se_guardan_en_cache ____
+
+cliente = <starlette.testclient.TestClient object at 0x7f1e7dd00180>
+ana = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwicm9sIjoiZXN0dWRpYW50ZSIsImV4cCI6MTc5NTA2ODgzNn0.pMyCBsddEXuIEn5zuvv_TK_S-pB7bdrJXrjc4QgoTKI'}
+
+    def test_fila19_las_respuestas_con_datos_personales_no_se_guardan_en_cache(cliente, ana):
+>       assert cliente.get("/me", headers=ana).headers["cache-control"] == "no-store"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_lab2_config.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Headers({'content-length': '127', 'content-type': 'application/json', 'vary': 'Origin'})
+key = 'cache-control'
+
+    def __getitem__(self, key: str) -> str:
+        """
+        Return a single header value.
+    
+        If there are multiple headers with the same key, then we concatenate
+        them with commas. See: https://tools.ietf.org/html/rfc7230#section-3.2.2
+        """
+        normalized_key = key.lower().encode(self.encoding)
+    
+        items = [
+            header_value.decode(self.encoding)
+            for _, header_key, header_value in self._list
+            if header_key == normalized_key
+        ]
+    
+        if items:
+            return ", ".join(items)
+    
+>       raise KeyError(key)
+E       KeyError: 'cache-control'
+
+.venv/lib/python3.14/site-packages/httpx/_models.py:302: KeyError
+____________ test_fila19_docs_funciona_sin_scripts_de_otro_dominio _____________
+
+cliente = <starlette.testclient.TestClient object at 0x7f1e7dd00e90>
+
+    def test_fila19_docs_funciona_sin_scripts_de_otro_dominio(cliente):
+        r = cliente.get("/docs")
+        assert r.status_code == 200
+        assert "swagger-ui" in r.text
+>       assert "cdn.jsdelivr.net" not in r.text          # ZAP 90003 (SRI) y 10017
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 'cdn.jsdelivr.net' not in '\n    <!DOC.../html>\n    '
+E         
+E         'cdn.jsdelivr.net' is contained here:
+E           
+E               <!DOCTYPE html>
+E               <html>
+E               <head>
+E               <meta name="viewport" content="width=device-width, initial-scale=1.0">...
+E         
+E         ...Full output truncated, use '-vv' to show
+
+tests/test_lab2_config.py:66: AssertionError
+__________________________ test_fila19_debug_apagado ___________________________
+
+    def test_fila19_debug_apagado():
+        from app.main import app
+    
+>       assert app.debug is False
+E       assert True is False
+E        +  where True = <fastapi.applications.FastAPI object at 0x7f1e7e2152b0>.debug
+
+tests/test_lab2_config.py:78: AssertionError
+______________ test_fila19_correo_repetido_responde_409_sin_traza ______________
+
+cliente = <starlette.testclient.TestClient object at 0x7f1e7dea6570>
+
+    def test_fila19_correo_repetido_responde_409_sin_traza(cliente):
+>       r = cliente.post("/registro", json={**NUEVO, "correo": "ana@presta.edu.co"})
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_lab2_config.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.14/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+.venv/lib/python3.14/site-packages/starlette/testclient.py:518: in request
+    return super().request(
+.venv/lib/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_client.py:928: in send
+    raise exc
+.venv/lib/python3.14/site-packages/httpx/_client.py:922: in send
+    response.read()
+.venv/lib/python3.14/site-packages/httpx/_models.py:881: in read
+    self._content = b"".join(self.iter_bytes())
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_models.py:897: in iter_bytes
+    for raw_bytes in self.iter_raw():
+                     ^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_models.py:951: in iter_raw
+    for raw_stream_bytes in self.stream:
+                            ^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_client.py:153: in __iter__
+    for chunk in self._stream:
+                 ^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/starlette/testclient.py:384: in iter_body
+    exit_stack.close()
+/usr/lib/python3.14/contextlib.py:627: in close
+    self.__exit__(None, None, None)
+/usr/lib/python3.14/contextlib.py:619: in __exit__
+    raise exc
+/usr/lib/python3.14/contextlib.py:604: in __exit__
+    if cb(*exc_details):
+       ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/starlette/testclient.py:399: in close_app
+    raise exception
+.venv/lib/python3.14/site-packages/anyio/from_thread.py:272: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/starlette/testclient.py:366: in run_app
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/applications.py:1194: in __call__
+    await super().__call__(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv/lib/python3.14/site-packages/fastapi/telemetry/_asgi.py:151: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/cors.py:91: in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+.venv/lib/python3.14/site-packages/starlette/middleware/cors.py:149: in simple_response
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:683: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2811: in app
+    await route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1330: in handle
+    await super().handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:289: in handle
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:166: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:152: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/routing.py:745: in app
+    raw_response = await run_endpoint_function(
+.venv/lib/python3.14/site-packages/fastapi/routing.py:374: in run_endpoint_function
+    return await run_in_threadpool(
+.venv/lib/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py:2779: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py:1124: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/telemetry/_api.py:244: in _run_sync_endpoint
+    return function(**arguments)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+datos = Registro(nombre='Carla Ruiz', documento='1088000111', correo='ana@presta.edu.co', telefono='3150000000', clave='carla2026')
+
+    @app.post("/registro", status_code=201)
+    def registrar(datos: Registro):
+        con = conectar()
+>       cur = con.execute(
+            "INSERT INTO usuarios (nombre, documento, correo, telefono, clave, rol) VALUES (?, ?, ?, ?, ?, ?)",
+            # T2 (Lab 1) · ASVS 15.3.3: toda cuenta nueva es estudiante; el rol no viene del cliente.
+            (datos.nombre, datos.documento, datos.correo, datos.telefono, hash_clave(datos.clave), "estudiante"),
+        )
+E       sqlite3.IntegrityError: UNIQUE constraint failed: usuarios.correo
+
+app/main.py:70: IntegrityError
+_____________ test_fila19_tras_un_error_la_base_no_queda_bloqueada _____________
+
+cliente = <starlette.testclient.TestClient object at 0x7f1e7de9b9b0>
+
+    def test_fila19_tras_un_error_la_base_no_queda_bloqueada(cliente):
+        for _ in range(3):
+>           cliente.post("/registro", json={**NUEVO, "correo": "ana@presta.edu.co"})
+
+tests/test_lab2_config.py:90: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.14/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+.venv/lib/python3.14/site-packages/starlette/testclient.py:518: in request
+    return super().request(
+.venv/lib/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_client.py:928: in send
+    raise exc
+.venv/lib/python3.14/site-packages/httpx/_client.py:922: in send
+    response.read()
+.venv/lib/python3.14/site-packages/httpx/_models.py:881: in read
+    self._content = b"".join(self.iter_bytes())
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_models.py:897: in iter_bytes
+    for raw_bytes in self.iter_raw():
+                     ^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_models.py:951: in iter_raw
+    for raw_stream_bytes in self.stream:
+                            ^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_client.py:153: in __iter__
+    for chunk in self._stream:
+                 ^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/starlette/testclient.py:384: in iter_body
+    exit_stack.close()
+/usr/lib/python3.14/contextlib.py:627: in close
+    self.__exit__(None, None, None)
+/usr/lib/python3.14/contextlib.py:619: in __exit__
+    raise exc
+/usr/lib/python3.14/contextlib.py:604: in __exit__
+    if cb(*exc_details):
+       ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/starlette/testclient.py:399: in close_app
+    raise exception
+.venv/lib/python3.14/site-packages/anyio/from_thread.py:272: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/starlette/testclient.py:366: in run_app
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/applications.py:1194: in __call__
+    await super().__call__(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv/lib/python3.14/site-packages/fastapi/telemetry/_asgi.py:151: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/cors.py:91: in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+.venv/lib/python3.14/site-packages/starlette/middleware/cors.py:149: in simple_response
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:683: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2811: in app
+    await route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1330: in handle
+    await super().handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:289: in handle
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:166: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:152: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/routing.py:745: in app
+    raw_response = await run_endpoint_function(
+.venv/lib/python3.14/site-packages/fastapi/routing.py:374: in run_endpoint_function
+    return await run_in_threadpool(
+.venv/lib/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py:2779: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py:1124: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/telemetry/_api.py:244: in _run_sync_endpoint
+    return function(**arguments)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+datos = Registro(nombre='Carla Ruiz', documento='1088000111', correo='ana@presta.edu.co', telefono='3150000000', clave='carla2026')
+
+    @app.post("/registro", status_code=201)
+    def registrar(datos: Registro):
+        con = conectar()
+>       cur = con.execute(
+            "INSERT INTO usuarios (nombre, documento, correo, telefono, clave, rol) VALUES (?, ?, ?, ?, ?, ?)",
+            # T2 (Lab 1) · ASVS 15.3.3: toda cuenta nueva es estudiante; el rol no viene del cliente.
+            (datos.nombre, datos.documento, datos.correo, datos.telefono, hash_clave(datos.clave), "estudiante"),
+        )
+E       sqlite3.IntegrityError: UNIQUE constraint failed: usuarios.correo
+
+app/main.py:70: IntegrityError
+____________ test_fila19_dockerfile_usa_un_usuario_sin_privilegios _____________
+
+    def test_fila19_dockerfile_usa_un_usuario_sin_privilegios():
+        lineas = [l.strip() for l in (RAIZ / "Dockerfile").read_text().splitlines() if l.strip()]
+        usuarios = [l.split()[1] for l in lineas if l.startswith("USER ")]
+>       assert usuarios and usuarios[-1] not in ("root", "0")
+E       assert ([])
+
+tests/test_lab2_config.py:100: AssertionError
+=============================== warnings summary ===============================
+.venv/lib/python3.14/site-packages/fastapi/testclient.py:1
+  /home/juanm/presta-ucp/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_lab2_config.py::test_fila2_la_clave_no_se_guarda_con_md5 - ...
+FAILED tests/test_lab2_config.py::test_fila2_la_misma_clave_da_hashes_distintos_por_la_sal
+FAILED tests/test_lab2_config.py::test_fila19_cors_no_acepta_un_origen_cualquiera
+FAILED tests/test_lab2_config.py::test_fila19_cabeceras_de_seguridad_en_la_api
+FAILED tests/test_lab2_config.py::test_fila19_las_respuestas_con_datos_personales_no_se_guardan_en_cache
+FAILED tests/test_lab2_config.py::test_fila19_docs_funciona_sin_scripts_de_otro_dominio
+FAILED tests/test_lab2_config.py::test_fila19_debug_apagado - assert True is ...
+FAILED tests/test_lab2_config.py::test_fila19_correo_repetido_responde_409_sin_traza
+FAILED tests/test_lab2_config.py::test_fila19_tras_un_error_la_base_no_queda_bloqueada
+FAILED tests/test_lab2_config.py::test_fila19_dockerfile_usa_un_usuario_sin_privilegios
+=================== 10 failed, 1 passed, 1 warning in 0.79s ====================

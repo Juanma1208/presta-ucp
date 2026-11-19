@@ -27,7 +27,7 @@ echo '## Login repetido 12 veces con clave incorrecta: ningun 429'
 run "for i in \$(seq 12); do curl -s -o /dev/null -w '%{http_code} ' -X POST $B/login -H '$J' -d '{\"correo\":\"ana@presta.edu.co\",\"clave\":\"mala\"}'; done; echo"
 
 paso "Fila 2 y 12 · El registro devuelve el hash MD5 de la contrasena (ASVS 11.4.2, 15.3.1)"
-echo "MD5 de '1' = $(printf 1 | md5sum | cut -d' ' -f1)  (coincide con el campo clave de arriba)"
+echo "MD5 de '1' = $(printf 1 | md5sum | cut -d' ' -f1)  (si coincide con el campo clave de arriba, la contrasena se guarda en MD5)"
 
 paso "Fila 4 · El login distingue correo inexistente de clave incorrecta (ASVS 6.3.8)"
 run "curl -s -o /dev/null -w 'correo que no existe -> HTTP %{http_code}\n' -X POST $B/login -H '$J' -d '{\"correo\":\"nadie@x.co\",\"clave\":\"x\"}'"
