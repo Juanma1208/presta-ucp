@@ -26,12 +26,8 @@ Guardar las imágenes en `seguridad/lab2/despues/capturas/`. Todas se toman desd
 | # | Archivo | Comando o lugar | Qué mostrar |
 |---|---|---|---|
 | 10 | `10-semgrep-despues.png` | `sed -n '1,30p' seguridad/lab2/despues/evidencias/semgrep.txt` | El comando y `Findings: 0 (0 blocking)` |
-| 11 | `11-zap-despues.png` | Navegador: `\\wsl.localhost\Ubuntu\home\juanm\presta-ucp\seguridad\lab2\despues\evidencias\zap.html` | Summary of Alerts con High 0 y Medium 0, y la tabla Alerts |
+| 11 | `11-zap-despues.png` y `11.1-zap-despues.png` | Navegador: `\\wsl.localhost\Ubuntu\home\juanm\presta-ucp\seguridad\lab2\despues\evidencias\zap.html` | Summary of Alerts con High 0 y Medium 0 (11), y la tabla Alerts con las 4 alertas (11.1) |
 
-## Código y entrega
+## Lo que no tiene captura
 
-| # | Archivo | Comando o lugar | Qué mostrar |
-|---|---|---|---|
-| 12 | `12-docs-funciona.png` | Navegador: `http://127.0.0.1:8000/docs` | Swagger UI cargando bien, servido desde la propia app |
-| 13 | `13-diff-codigo.png` | `git diff bdf1baa 4d9c740 -- app/main.py app/auth.py` | Los cambios del código (rojo lo que se quitó, verde lo que se puso) |
-| 14 | `14-pull-request.png` | Navegador, en la página del PR en GitHub | El título y la descripción del PR |
+El diff del código y el PR no tienen captura: los dos se ven directamente en el pull request de GitHub.

@@ -129,6 +129,7 @@ Qué corrigió cada hallazgo:
 | Storable and Cacheable Content [10049] | Informational | Falso positivo | Ahora solo aparece en los archivos de `/static/swagger/` (JavaScript, CSS e ícono), que son públicos y deben poder guardarse en caché | — |
 | Modern Web Application [10109] | Informational | Falso positivo | Solo informa que `/docs` usa JavaScript | — |
 
+- **Semgrep no revisó `app/static/swagger/swagger-ui-bundle.js`** porque pesa más de 1 MB (`despues/semgrep.txt`: «Files larger than 1.0 MB: 1»). Es Swagger UI 5.34.1 sin modificar, código de terceros verificado contra el hash publicado en npm (`app/static/swagger/VERSION.md`), así que el «0 hallazgos» se refiere al código propio de la app.
 - **Semgrep confirma 4 de las correcciones**, pero no las del top 5 que nunca vio: la inyección SQL, el rol, BOLA y la devolución solo se pueden comprobar con las pruebas y los `curl`.
 - **Las pruebas no generaron falsos positivos nuevos en Semgrep.** `tests/test_lab2_top5.py` firma un token con `"presta-ucp-2026"` para comprobar que se rechaza, y Semgrep no lo marcó.
 - **Corregir abrió una alerta nueva.** La alerta `Timestamp Disclosure` no existía antes: aparece porque ahora el JavaScript de Swagger lo sirve la app y ZAP lo revisa como contenido propio.
