@@ -14,6 +14,12 @@ Proyecto integrador del curso de Desarrollo Seguro.
 
 ## Cómo ejecutarla
 
+Primero cree el archivo `.env` con el secreto de los tokens (no se sube al repositorio):
+
+```bash
+python3 -c "import secrets; print('JWT_SECRET=' + secrets.token_urlsafe(48))" > .env
+```
+
 Con Docker (solo escucha en `127.0.0.1`):
 
 ```bash
@@ -26,6 +32,7 @@ O en local, con un entorno virtual:
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+set -a; source .env; set +a
 uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 

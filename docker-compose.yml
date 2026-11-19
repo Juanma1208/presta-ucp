@@ -5,6 +5,7 @@ services:
       - "127.0.0.1:8000:8000"
     environment:
       - DB_PATH=/data/presta.db
+      - JWT_SECRET=${JWT_SECRET:?Defina JWT_SECRET en el archivo .env (ver .env.example)}
     volumes:
       - datos:/data
 

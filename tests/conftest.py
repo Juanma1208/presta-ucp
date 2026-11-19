@@ -1,5 +1,10 @@
+import os
+
 import pytest
 from fastapi.testclient import TestClient
+
+# Secreto solo para las pruebas (la app exige JWT_SECRET de al menos 32 bytes).
+os.environ.setdefault("JWT_SECRET", "secreto-de-pruebas-que-no-se-usa-en-produccion")
 
 
 @pytest.fixture
@@ -24,3 +29,8 @@ def ana(cliente):
 @pytest.fixture
 def admin(cliente):
     return token(cliente, "admin@presta.edu.co", "admin123")
+
+
+@pytest.fixture
+def beto(cliente):
+    return token(cliente, "beto@presta.edu.co", "beto12345")

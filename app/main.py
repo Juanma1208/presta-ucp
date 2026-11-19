@@ -40,7 +40,6 @@ class Registro(BaseModel):
     correo: str
     telefono: str
     clave: str
-    rol: str = "estudiante"
 
 
 class Login(BaseModel):
@@ -70,7 +69,8 @@ def registrar(datos: Registro):
     con = conectar()
     cur = con.execute(
         "INSERT INTO usuarios (nombre, documento, correo, telefono, clave, rol) VALUES (?, ?, ?, ?, ?, ?)",
-        (datos.nombre, datos.documento, datos.correo, datos.telefono, hash_clave(datos.clave), datos.rol),
+        # T2 (Lab 1) · ASVS 15.3.3: toda cuenta nueva es estudiante; el rol no viene del cliente.
+        (datos.nombre, datos.documento, datos.correo, datos.telefono, hash_clave(datos.clave), "estudiante"),
     )
     con.commit()
     usuario = con.execute("SELECT * FROM usuarios WHERE id = ?", (cur.lastrowid,)).fetchone()
@@ -105,7 +105,8 @@ def mis_datos(usuario: dict = Depends(usuario_actual)):
 @app.get("/equipos")
 def listar_equipos(buscar: str = ""):
     con = conectar()
-    filas = con.execute(f"SELECT * FROM equipos WHERE nombre LIKE '%{buscar}%'").fetchall()
+    # T1 (Lab 1) · ASVS 1.2.4: consulta parametrizada; el % va dentro del parámetro.
+    filas = con.execute("SELECT * FROM equipos WHERE nombre LIKE ?", (f"%{buscar}%",)).fetchall()
     con.close()
     return [dict(f) for f in filas]
 
@@ -172,9 +173,10 @@ def ver_prestamo(prestamo_id: int, usuario: dict = Depends(usuario_actual)):
         FROM prestamos p
         JOIN equipos e ON e.id = p.equipo_id
         JOIN usuarios u ON u.id = p.usuario_id
-        WHERE p.id = ?
+        WHERE p.id = ? AND (p.usuario_id = ? OR ? = 'admin')
         """,
-        (prestamo_id,),
+        # T4 (Lab 1) · ASVS 8.2.2: solo el dueño (o el admin) ve el préstamo.
+        (prestamo_id, usuario["id"], usuario["rol"]),
     ).fetchone()
     con.close()
     if not fila:
@@ -183,7 +185,7 @@ def ver_prestamo(prestamo_id: int, usuario: dict = Depends(usuario_actual)):
 
 
 @app.post("/prestamos/{prestamo_id}/devolver")
-def devolver(prestamo_id: int, usuario: dict = Depends(usuario_actual)):
+def devolver(prestamo_id: int, admin: dict = Depends(solo_admin)):  # T5 (Lab 1) · ASVS 8.3.1
     con = conectar()
     prestamo = con.execute("SELECT * FROM prestamos WHERE id = ?", (prestamo_id,)).fetchone()
     if not prestamo:
