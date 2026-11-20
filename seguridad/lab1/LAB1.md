@@ -1,66 +1,77 @@
 # Lab 1 · Modelo de amenazas · PrestaUCP
 
-- **Aplicación:** PrestaUCP, una API para el préstamo de equipos de la universidad, hecha en FastAPI + SQLite + PyJWT (`app/main.py`, `app/auth.py`, `app/db.py`).
-- **Alcance:** toda la aplicación: registro, login, catálogo de equipos, préstamos y devoluciones.
-- **Archivos:** `modelo.json` es el modelo de OWASP Threat Dragon e `informe.pdf` es el reporte generado desde Threat Dragon.
+- **Aplicación:** PrestaUCP, una API para gestionar el préstamo de equipos de la universidad, desarrollada con FastAPI, SQLite y PyJWT (`app/main.py`, `app/auth.py` y `app/db.py`).
+- **Alcance:** se modeló toda la aplicación, incluyendo el registro, inicio de sesión, catálogo de equipos, préstamos y devoluciones.
+- **Archivos entregados:** `modelo.json`, que contiene el modelo realizado en OWASP Threat Dragon, e `informe.pdf`, correspondiente al reporte exportado desde la herramienta.
 
 ## 1. ¿En qué se está trabajando?
 
+El modelo de amenazas incluye los principales componentes de la aplicación y las relaciones entre ellos.
+
 | Tipo | Elementos |
 |---|---|
-| Actores | Visitante anónimo (sin token), estudiante (token JWT) y administrador (token JWT con rol admin) |
-| Procesos | Autenticación (`POST /registro` y `POST /login`, con `auth.py`) y API PrestaUCP (equipos y préstamos) |
-| Almacenes | SQLite `presta.db` (usuarios con nombre, documento, correo, teléfono, hash de la clave y rol; equipos; préstamos) y logs del servidor (uvicorn) |
-| Flujos | 9 flujos, cada uno con su protocolo, si va cifrado y si pasa por una red pública. Los flujos de los actores usan **HTTP sin cifrar** por una red pública. Los flujos hacia la base y los logs son locales |
-| Límites de confianza | **L1** Internet \| servidor · **L2** aplicación \| almacenamiento (la base y los logs viven en el volumen de Docker) |
+| Actores | Visitante anónimo (sin token), estudiante (token JWT) y administrador (token JWT con rol `admin`) |
+| Procesos | Autenticación (`POST /registro` y `POST /login`, implementada en `auth.py`) y la API de PrestaUCP (gestión de equipos y préstamos) |
+| Almacenes | Base de datos SQLite `presta.db` (usuarios con nombre, documento, correo, teléfono, hash de la contraseña y rol; equipos; préstamos) y los registros generados por el servidor (`uvicorn`) |
+| Flujos | Se identificaron 9 flujos. Cada uno especifica el protocolo utilizado, si la comunicación está cifrada y si atraviesa una red pública. Los flujos entre los usuarios y la aplicación utilizan **HTTP sin cifrar**, mientras que la comunicación con la base de datos y los logs es local. |
+| Límites de confianza | **L1:** Internet ↔ Servidor. **L2:** Aplicación ↔ Almacenamiento (base de datos y logs almacenados en el volumen de Docker). |
 
-La app no usa proveedores externos, por eso solo tiene estos dos límites.
+Como la aplicación no consume servicios externos, únicamente se definieron estos dos límites de confianza.
 
 ## 2. ¿Qué puede salir mal?
 
-Se recorrió cada elemento del diagrama con STRIDE y salieron **17 amenazas**. Todas están registradas en `modelo.json`, cada una con su descripción, el `archivo:línea` donde ocurre, la justificación de I × P y la mitigación.
+Se analizó cada elemento del diagrama utilizando la metodología STRIDE y se identificaron **17 amenazas**. Todas quedaron registradas en `modelo.json` junto con su descripción, el `archivo:línea` donde aparecen, la valoración de impacto y probabilidad, y la mitigación propuesta.
 
 | ID | Elemento | STRIDE | Amenaza | I × P | Severidad |
 |---|---|---|---|---|---|
-| T-01 | Autenticación | E | Cualquiera se registra como administrador (asignación masiva) | 3 × 3 = 9 | High |
-| T-02 | Autenticación | S | El secreto del JWT está fijo en el código del repositorio público | 3 × 3 = 9 | High |
-| T-07 | API PrestaUCP | I | BOLA: un estudiante ve el préstamo de otro con sus datos personales | 3 × 3 = 9 | High |
-| T-08 | API PrestaUCP | E | Cualquier estudiante registra devoluciones, incluso de préstamos ajenos | 3 × 3 = 9 | High |
-| T-17 | Flujo Visitante → API | T | Inyección SQL en la búsqueda de equipos | 3 × 3 = 9 | High |
-| T-03 | Autenticación | S | Tokens sin expiración ni cierre de sesión | 3 × 2 = 6 | Medium |
-| T-04 | Autenticación | S | Login sin límite de intentos y con contraseñas débiles | 3 × 2 = 6 | Medium |
-| T-05 | Autenticación | I | El login revela si un correo está registrado | 2 × 3 = 6 | Medium |
-| T-06 | Autenticación | I | El registro devuelve el hash de la contraseña | 2 × 3 = 6 | Medium |
-| T-09 | API PrestaUCP | T | El estudiante decide cuántos días dura el préstamo (**negocio**) | 2 × 3 = 6 | Medium |
-| T-11 | API PrestaUCP | I | Errores con traza completa y CORS abierto | 2 × 3 = 6 | Medium |
-| T-13 | SQLite | I | Contraseñas en MD5 sin sal y datos personales sin cifrar | 3 × 2 = 6 | Medium |
-| T-14 | Flujo Visitante → Autenticación | I | Contraseñas, tokens y datos personales viajan sin cifrar | 3 × 2 = 6 | Medium |
-| T-15 | Administrador | S | Cuenta de administrador por defecto con contraseña débil | 3 × 2 = 6 | Medium |
-| T-10 | API PrestaUCP | T | Dos peticiones simultáneas se saltan el límite de préstamos (**negocio**) | 2 × 2 = 4 | Medium |
-| T-12 | API PrestaUCP | D | Sin límite de peticiones ni paginación | 2 × 2 = 4 | Medium |
-| T-16 | Logs del servidor | R | No queda registro de quién pidió o devolvió un préstamo | 2 × 2 = 4 | Medium |
+| T-01 | Autenticación | E | Cualquier usuario puede registrarse como administrador mediante asignación masiva. | 3 × 3 = 9 | High |
+| T-02 | Autenticación | S | El secreto utilizado para firmar los JWT está fijo en el código fuente del repositorio. | 3 × 3 = 9 | High |
+| T-07 | API PrestaUCP | I | Vulnerabilidad BOLA: un estudiante puede consultar el préstamo de otro usuario y acceder a sus datos personales. | 3 × 3 = 9 | High |
+| T-08 | API PrestaUCP | E | Cualquier estudiante puede registrar devoluciones, incluso de préstamos que no le pertenecen. | 3 × 3 = 9 | High |
+| T-17 | Flujo Visitante → API | T | Inyección SQL en la búsqueda de equipos. | 3 × 3 = 9 | High |
+| T-03 | Autenticación | S | Los tokens no tienen expiración ni existe un mecanismo de cierre de sesión. | 3 × 2 = 6 | Medium |
+| T-04 | Autenticación | S | El inicio de sesión no limita intentos y permite contraseñas débiles. | 3 × 2 = 6 | Medium |
+| T-05 | Autenticación | I | El login permite identificar si un correo electrónico ya está registrado. | 2 × 3 = 6 | Medium |
+| T-06 | Autenticación | I | El registro devuelve el hash de la contraseña en la respuesta. | 2 × 3 = 6 | Medium |
+| T-09 | API PrestaUCP | T | El estudiante puede decidir la duración del préstamo (**lógica de negocio**). | 2 × 3 = 6 | Medium |
+| T-11 | API PrestaUCP | I | La aplicación expone trazas completas de error y tiene CORS abierto. | 2 × 3 = 6 | Medium |
+| T-13 | SQLite | I | Las contraseñas se almacenan con MD5 sin sal y los datos personales no están cifrados. | 3 × 2 = 6 | Medium |
+| T-14 | Flujo Visitante → Autenticación | I | Contraseñas, tokens y datos personales viajan sin cifrado. | 3 × 2 = 6 | Medium |
+| T-15 | Administrador | S | Existe una cuenta de administrador por defecto con una contraseña débil. | 3 × 2 = 6 | Medium |
+| T-10 | API PrestaUCP | T | Dos solicitudes simultáneas pueden superar el límite de préstamos permitido (**lógica de negocio**). | 2 × 2 = 4 | Medium |
+| T-12 | API PrestaUCP | D | No existe limitación de peticiones ni paginación. | 2 × 2 = 4 | Medium |
+| T-16 | Logs del servidor | R | No queda evidencia de quién solicita o devuelve un préstamo. | 2 × 2 = 4 | Medium |
 
-**Cobertura:** están las 6 categorías de STRIDE (S: 4, T: 3, R: 1, I: 6, D: 1, E: 2).
+**Cobertura del análisis:** se identificaron amenazas pertenecientes a las seis categorías de STRIDE (S: 4, T: 3, R: 1, I: 6, D: 1 y E: 2).
 
-**Lógica de negocio:** hay 2 amenazas de este tipo, T-09 y T-10, y ninguna herramienta automática las encontraría. La más clara es **T-09**. La regla del préstamo es «máximo 3 días», pero esa regla solo está en el README. En el código, `PrestamoNuevo` tiene `dias: int = 3` (`main.py:58`) y `pedir_prestamo` usa el valor que envía el cliente sin revisarlo (`main.py:143`). Por eso un estudiante que envía `"dias": 365` se queda con un portátil un año. El código funciona y no tiene un patrón peligroso: lo que falla es que el servidor no aplica la regla del negocio.
+### Amenazas de lógica de negocio
 
-**T-10** es menos evidente. `pedir_prestamo` primero revisa que el equipo esté disponible y que el estudiante tenga menos de 2 préstamos, y después inserta el préstamo (`main.py:125-151`). Si llegan dos peticiones al mismo tiempo, las dos pasan las validaciones antes de que alguna guarde el cambio, y el mismo equipo queda prestado a dos personas.
+Se identificaron dos amenazas que corresponden a reglas del negocio y que no serían detectadas por herramientas automáticas: **T-09** y **T-10**.
 
-**Criterio de calificación:** el impacto es 3 si hay exposición de datos personales, toma de cuentas o control de la app; 2 si el daño es acotado (equipos retenidos, información técnica expuesta); y 1 si es menor. La probabilidad es 3 si basta con una petición sin token o con un token normal; 2 si hace falta una condición adicional (robar un token, estar en la misma red, enviar peticiones en paralelo o llegar a la base); y 1 si se necesita acceso al servidor.
+La más evidente es **T-09**. La política del sistema indica que un préstamo puede durar como máximo tres días, pero esa restricción únicamente aparece documentada en el README. En el código, el modelo `PrestamoNuevo` define `dias: int = 3` (`main.py:58`), pero el endpoint `pedir_prestamo` utiliza directamente el valor enviado por el cliente (`main.py:143`) sin validarlo. Como consecuencia, un estudiante puede solicitar un préstamo enviando `"dias": 365` y conservar un equipo durante un año. Desde el punto de vista técnico el código funciona correctamente; el problema es que el servidor no aplica la regla del negocio.
+
+La amenaza **T-10** es menos evidente. Antes de crear un préstamo, el método `pedir_prestamo` verifica que el equipo esté disponible y que el estudiante tenga menos de dos préstamos activos (`main.py:125-151`). Si dos solicitudes llegan prácticamente al mismo tiempo, ambas pueden superar las validaciones antes de que alguna registre el préstamo en la base de datos, permitiendo que el mismo equipo quede asignado a dos personas.
+
+### Criterio de valoración
+
+El impacto se calificó con valor **3** cuando la amenaza permitía exponer datos personales, tomar control de cuentas o tomar el control de la aplicación. Se asignó **2** cuando el daño era limitado, como la retención de equipos o la exposición de información técnica, y **1** para afectaciones menores.
+
+La probabilidad recibió un valor **3** cuando bastaba con enviar una petición sin autenticación o utilizando un token de un estudiante. Se asignó **2** cuando era necesario cumplir una condición adicional, como robar un token, estar en la misma red, ejecutar peticiones concurrentes o acceder directamente a la base de datos. Finalmente, se utilizó **1** cuando la explotación requería acceso al servidor.
 
 ## 3. ¿Qué se va a hacer al respecto? Top 5
 
-Cinco amenazas tienen riesgo 9 y todas entraron al top 5. Para el orden se tuvo en cuenta qué tan fácil es explotarlas: las tres primeras no necesitan sesión, mientras que T4 y T5 necesitan el token de cualquier estudiante.
+Cinco amenazas obtuvieron un riesgo de **9**, por lo que todas fueron priorizadas. El orden se definió considerando la facilidad de explotación: las tres primeras pueden ejecutarse sin autenticación, mientras que las dos restantes requieren un token válido de estudiante.
 
-| ID | Amenaza | STRIDE | I × P | Requisito de seguridad (verificable) | ASVS 5.0 | Cómo se verifica |
+| ID | Amenaza | STRIDE | I × P | Requisito de seguridad | ASVS 5.0 | Verificación |
 |---|---|---|---|---|---|---|
-| T1 (T-17) | Inyección SQL en `GET /equipos?buscar=` (`main.py:108`) | T | 3 × 3 = 9 | Todas las consultas usan parámetros `?`. En la búsqueda, el `%` va dentro del parámetro (`LIKE ?`) y no se pega al SQL | V1 | Prueba: `?buscar=' UNION SELECT id, correo, clave, rol FROM usuarios--` no devuelve correos ni hashes, y una búsqueda con apóstrofo funciona. Herramienta: Semgrep (`tainted-sql-string`) |
-| T2 (T-01) | Cualquiera se registra como administrador (`main.py:43`, `main.py:69-78`) | E | 3 × 3 = 9 | El registro no usa el rol que envía el cliente: toda cuenta nueva queda como `estudiante` | V15, V8 | Prueba: registrarse con `"rol": "admin"` deja la cuenta como estudiante, y con ese token `POST /equipos` responde 403 |
-| T3 (T-02) | Secreto del JWT fijo en el código (`auth.py:8`) | S | 3 × 3 = 9 | El secreto se lee de una variable de entorno, es aleatorio y tiene al menos 32 bytes. Los tokens tienen `exp` | V13, V9 | Prueba: un token firmado con `presta-ucp-2026` responde 401, y un token vencido también. Herramienta: Semgrep `p/secrets` y revisión del historial de git |
-| T4 (T-07) | BOLA en `GET /prestamos/{id}` (`main.py:166-182`) | I | 3 × 3 = 9 | La consulta filtra por el dueño del préstamo (el admin puede ver todos). Un préstamo ajeno responde 404 igual que uno inexistente | V8 | Prueba: Ana pide `/prestamos/2` (de Beto), recibe 404 y la respuesta no tiene el documento ni el teléfono de Beto. Ana sigue viendo `/prestamos/1` |
-| T5 (T-08) | Cualquier estudiante registra devoluciones (`main.py:186-199`) | E | 3 × 3 = 9 | `POST /prestamos/{id}/devolver` exige el rol admin con `solo_admin`, igual que `POST /equipos` | V8 | Prueba: Ana hace la devolución y recibe 403, y el equipo sigue prestado. El admin la hace y recibe 200 |
+| **T1 (T-17)** | Inyección SQL en `GET /equipos?buscar=` (`main.py:108`) | T | 3 × 3 = 9 | Todas las consultas utilizan parámetros (`?`) y el comodín `%` forma parte del parámetro, no de la consulta SQL. | V1 | Se verifica enviando `?buscar=' UNION SELECT id, correo, clave, rol FROM usuarios--`, comprobando que no se devuelven correos ni hashes y que una búsqueda con apóstrofos funciona correctamente. También puede verificarse con la regla `tainted-sql-string` de Semgrep. |
+| **T2 (T-01)** | Registro como administrador (`main.py:43`, `main.py:69-78`) | E | 3 × 3 = 9 | El rol enviado por el cliente se ignora y todas las cuentas nuevas se crean como `estudiante`. | V15, V8 | Se registra un usuario enviando `"rol": "admin"` y se comprueba que el rol asignado continúa siendo estudiante y que `POST /equipos` responde `403`. |
+| **T3 (T-02)** | Secreto del JWT embebido en el código (`auth.py:8`) | S | 3 × 3 = 9 | El secreto se obtiene desde una variable de entorno, es aleatorio, tiene al menos 32 bytes y todos los tokens incluyen expiración (`exp`). | V13, V9 | Se verifica que un token firmado con `presta-ucp-2026` sea rechazado con `401` y que un token expirado también sea inválido. Además, se revisa el historial de Git y las reglas `p/secrets` de Semgrep. |
+| **T4 (T-07)** | BOLA en `GET /prestamos/{id}` (`main.py:166-182`) | I | 3 × 3 = 9 | La consulta únicamente devuelve préstamos pertenecientes al usuario autenticado, salvo para el administrador. Los préstamos ajenos responden `404`, igual que los inexistentes. | V8 | Se comprueba que Ana no pueda consultar el préstamo de Beto (`404`) y que la respuesta no exponga información personal, mientras que Ana sí puede acceder a sus propios préstamos. |
+| **T5 (T-08)** | Registro de devoluciones por cualquier estudiante (`main.py:186-199`) | E | 3 × 3 = 9 | El endpoint `POST /prestamos/{id}/devolver` requiere el rol de administrador mediante `solo_admin`. | V8 | Se verifica que un estudiante reciba `403` al intentar registrar una devolución y que el equipo siga prestado, y que únicamente el administrador pueda realizar la operación con éxito. |
 
 ## 4. ¿Se hizo un buen trabajo?
 
-1. **Qué quedó fuera del modelo.** El despliegue en producción (proxy con TLS, servidor, copias de seguridad de la base), porque hoy la app solo corre en Docker en `127.0.0.1`. Tampoco se modeló el cambio y la recuperación de contraseña, porque la app no los tiene. Esas partes se deben modelar cuando existan.
-2. **Qué amenaza sorprendió.** T-02. El secreto del JWT parecía un detalle de configuración, pero como el repositorio es público, cualquiera puede leerlo y firmar un token de administrador sin conocer ninguna contraseña. Además, deja sin efecto los demás controles de acceso: `solo_admin` revisa el rol que viene en el token, y ese rol lo puede escribir el atacante.
+1. **Aspectos fuera del alcance.** No se modeló la infraestructura de producción, como el proxy inverso con TLS, el servidor físico o virtual y las copias de seguridad, ya que actualmente la aplicación solo se ejecuta localmente mediante Docker sobre `127.0.0.1`. Tampoco se incluyeron los procesos de recuperación o cambio de contraseña, debido a que aún no existen en la aplicación.
+
+2. **Amenaza que más sorprendió.** La amenaza **T-02** fue la más llamativa. Aunque inicialmente parecía un problema de configuración, al estar el repositorio disponible públicamente cualquier persona puede obtener el secreto utilizado para firmar los JWT y generar un token con privilegios de administrador sin conocer ninguna contraseña. Esto hace que controles como `solo_admin` pierdan efectividad, ya que la aplicación confía en el rol contenido dentro del token.
