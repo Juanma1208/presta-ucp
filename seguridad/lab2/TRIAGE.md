@@ -2,7 +2,7 @@
 
 ## SAST: Semgrep
 
-Se usaron los conjuntos de reglas `p/python`, `p/secrets` y `p/owasp-top-ten`, sin incluir `seguridad/` ni `.venv/`. El reporte está en `evidencias/semgrep.sarif` y la salida de consola en `evidencias/semgrep.txt`.
+Se usaron los conjuntos de reglas `p/python`, `p/secrets` y `p/owasp-top-ten`, sin incluir `seguridad/` ni `.venv/`. El reporte está en `antes/evidencias/semgrep.sarif` y la salida de consola en `antes/evidencias/semgrep.txt`.
 
 - **`semgrep.sarif`:** 4 hallazgos, 2 de severidad ERROR y 2 WARNING.
 - **Salida en pantalla (`semgrep.txt`, captura `09-semgrep.png`):** 2 hallazgos, los dos ERROR, marcados como «Blocking». Los WARNING solo aparecen en el SARIF.
@@ -11,14 +11,14 @@ Se usaron los conjuntos de reglas `p/python`, `p/secrets` y `p/owasp-top-ten`, s
 
 | Regla | Archivo:línea | ¿Verdadero o falso positivo? | Por qué | Fila ASVS relacionada |
 |---|---|---|---|---|
-| `python.jwt.security.jwt-hardcode.jwt-python-hardcoded-secret` | `app/auth.py:24` | Verdadero positivo | El secreto del JWT está escrito en el código (`app/auth.py:8`). Se comprobó que se puede explotar: con ese secreto se forja un token de admin y `POST /equipos` lo acepta con HTTP 201 (`evidencias/curl.txt`, captura `05-secreto-jwt.png`) | 17, 23 (13.3.1) |
+| `python.jwt.security.jwt-hardcode.jwt-python-hardcoded-secret` | `app/auth.py:24` | Verdadero positivo | El secreto del JWT está escrito en el código (`app/auth.py:8`). Se comprobó que se puede explotar: con ese secreto se forja un token de admin y `POST /equipos` lo acepta con HTTP 201 (`antes/evidencias/curl.txt`, captura `05-secreto-jwt.png`) | 17, 23 (13.3.1) |
 | `dockerfile.security.missing-user.missing-user` | `Dockerfile:9` | Verdadero positivo | El Dockerfile no tiene `USER`, así que uvicorn corre como `root` dentro del contenedor. Si alguien logra ejecutar código aprovechando otra falla, lo haría como root | 19 |
 
 ### Hallazgos WARNING del SARIF (también se revisaron)
 
 | Regla | Archivo:línea | ¿Verdadero o falso positivo? | Por qué | Fila ASVS relacionada |
 |---|---|---|---|---|
-| `python.lang.security.insecure-hash-algorithms-md5.insecure-hash-algorithm-md5` | `app/auth.py:15` | Verdadero positivo | `hash_clave` usa MD5 sin sal. El registro devuelve `c4ca4238a0b923820dcc509a6f75849b`, que es el MD5 de «1» y se revierte en segundos con tablas en línea (`evidencias/curl.txt`, captura `04-registro-hash-rol.png`) | 2 (11.4.2) |
+| `python.lang.security.insecure-hash-algorithms-md5.insecure-hash-algorithm-md5` | `app/auth.py:15` | Verdadero positivo | `hash_clave` usa MD5 sin sal. El registro devuelve `c4ca4238a0b923820dcc509a6f75849b`, que es el MD5 de «1» y se revierte en segundos con tablas en línea (`antes/evidencias/curl.txt`, captura `04-registro-hash-rol.png`) | 2 (11.4.2) |
 | `python.fastapi.security.wildcard-cors.wildcard-cors` | `app/main.py:31` | Verdadero positivo | Con `allow_origins=["*"]`, cualquier sitio puede llamar a la API desde el navegador de un usuario. Se confirmó con `curl`: una petición con `Origin: https://malo.example` recibe `access-control-allow-origin: *` (captura `08-debug-cors.png`) | 19 |
 
 Semgrep no tuvo falsos positivos: los 4 hallazgos son fallas reales.
@@ -37,11 +37,11 @@ Semgrep no tuvo falsos positivos: los 4 hallazgos son fallas reales.
 
 ## DAST: ZAP
 
-Primero se intentó el escaneo de API (`zap-api-scan.py`) sobre `/openapi.json`, con un token de administrador. Ese escaneo se quedó trabado: las peticiones en paralelo del escaneo activo provocaron **364 errores `database is locked`** en la app (`evidencias/log-bloqueo-db.txt`).
+Primero se intentó el escaneo de API (`zap-api-scan.py`) sobre `/openapi.json`, con un token de administrador. Ese escaneo se quedó trabado: las peticiones en paralelo del escaneo activo provocaron **364 errores `database is locked`** en la app (`antes/evidencias/log-bloqueo-db.txt`).
 
 El problema estaba en el código. Cuando una petición falla a mitad de camino, la conexión a SQLite no se cierra (`app/main.py:69-78`), la base queda bloqueada y las escrituras siguientes fallan. Es una denegación de servicio real. Tiene relación con la amenaza T-12 del Lab 1 (D, sin límite de peticiones) y con la fila 13 de ASVS, pero la causa es distinta: T-12 habla de peticiones sin límite, y aquí el problema son las conexiones que quedan abiertas. Como el modelo del Lab 1 no tenía esta amenaza, es un hallazgo nuevo del Lab 2.
 
-Por eso se cambió al escaneo pasivo (`zap-baseline.py`) sobre `http://127.0.0.1:8000/docs`, que es la única página HTML de la app. El resultado fue **FAIL 0 · WARN 9 · PASS 59**. El reporte está en `evidencias/zap.html` y la consola en `evidencias/zap.txt`.
+Por eso se cambió al escaneo pasivo (`zap-baseline.py`) sobre `http://127.0.0.1:8000/docs`, que es la única página HTML de la app. El resultado fue **FAIL 0 · WARN 9 · PASS 59**. El reporte está en `antes/evidencias/zap.html` y la consola en `antes/evidencias/zap.txt`.
 
 ### Alertas Medium (no hubo High)
 
@@ -64,7 +64,7 @@ Por eso se cambió al escaneo pasivo (`zap-baseline.py`) sobre `http://127.0.0.1
 
 ### Lo que ZAP no encontró
 
-Como el baseline es pasivo y no tenía token, solo vio las cabeceras de `/docs`. No detectó la inyección SQL, BOLA en `/prestamos/{id}`, la asignación masiva del rol, la devolución sin rol admin, el secreto del JWT ni los días del préstamo. Todo eso salió de la revisión con ASVS y de los `curl` de `evidencias/curl.txt`. Lo único «de comportamiento» que mostró ZAP fue indirecto: el bloqueo de la base en el primer intento.
+Como el baseline es pasivo y no tenía token, solo vio las cabeceras de `/docs`. No detectó la inyección SQL, BOLA en `/prestamos/{id}`, la asignación masiva del rol, la devolución sin rol admin, el secreto del JWT ni los días del préstamo. Todo eso salió de la revisión con ASVS y de los `curl` de `antes/evidencias/curl.txt`. Lo único «de comportamiento» que mostró ZAP fue indirecto: el bloqueo de la base en el primer intento.
 
 ## ¿Por qué Semgrep y ZAP encontraron cosas distintas?
 
@@ -93,7 +93,7 @@ En esta app las dos herramientas no coincidieron en nada. Semgrep encontró 4 fa
 
 La inyección SQL (`app/main.py:108`), BOLA en `/prestamos/{id}` (`app/main.py:166`), la asignación masiva del rol (`app/main.py:43`, `69`), la devolución sin rol admin (`app/main.py:186`), los días del préstamo que decide el estudiante (`app/main.py:143`), el hash que devuelve el registro (`app/main.py:77`), el login que revela si el usuario existe (`app/main.py:86-89`) y el `debug=True` que muestra la traza (`app/main.py:25`).
 
-Casi todas son fallas de autorización o de lógica de negocio. El código es válido y la respuesta HTTP es un 200 normal, así que para saber que algo está mal hay que conocer la regla del negocio: «un préstamo es de su dueño», «el rol lo asigna el sistema», «devolver es tarea del administrador». Ninguna herramienta conoce esas reglas, y por eso estas fallas salieron de la revisión con ASVS y de los `curl` de `evidencias/curl.txt`.
+Casi todas son fallas de autorización o de lógica de negocio. El código es válido y la respuesta HTTP es un 200 normal, así que para saber que algo está mal hay que conocer la regla del negocio: «un préstamo es de su dueño», «el rol lo asigna el sistema», «devolver es tarea del administrador». Ninguna herramienta conoce esas reglas, y por eso estas fallas salieron de la revisión con ASVS y de los `curl` de `antes/evidencias/curl.txt`.
 
 La inyección SQL es el caso que más llama la atención, porque es una falla técnica clásica. Semgrep no la marcó, probablemente porque en FastAPI el parámetro `buscar` llega como argumento de la función y no desde `request.args` como en Flask, y las reglas de `p/python` no siguieron el dato hasta el f-string. ZAP tampoco la vio, porque el baseline no envía cargas de ataque y el escaneo activo tuvo que detenerse por el bloqueo de la base.
 
