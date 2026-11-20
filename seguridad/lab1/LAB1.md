@@ -1,8 +1,8 @@
 # Lab 1 · Modelo de amenazas · PrestaUCP
 
 - **Aplicación:** PrestaUCP es una API para el préstamo de equipos de la universidad. Está hecha con FastAPI, SQLite y PyJWT (`app/main.py`, `app/auth.py` y `app/db.py`).
-- **Alcance:** modelamos toda la aplicación: registro, inicio de sesión, catálogo de equipos, préstamos y devoluciones.
-- **Archivos:** `modelo.json` es el modelo que hicimos en OWASP Threat Dragon e `informe.pdf` es el reporte que genera la herramienta.
+- **Alcance:** se modeló toda la aplicación: registro, inicio de sesión, catálogo de equipos, préstamos y devoluciones.
+- **Archivos:** `modelo.json` es el modelo que se hizo en OWASP Threat Dragon e `informe.pdf` es el reporte que genera la herramienta.
 
 ## 1. ¿En qué se está trabajando?
 
@@ -20,7 +20,7 @@ Solo hay dos límites de confianza porque la app no usa servicios externos. Si m
 
 ## 2. ¿Qué puede salir mal?
 
-Recorrimos cada elemento del diagrama con STRIDE y salieron **17 amenazas**. Todas están en `modelo.json` con su descripción, el `archivo:línea` donde ocurren, la calificación de impacto y probabilidad, y la mitigación.
+Se recorrió cada elemento del diagrama con STRIDE y salieron **17 amenazas**. Todas están en `modelo.json` con su descripción, el `archivo:línea` donde ocurren, la calificación de impacto y probabilidad, y la mitigación.
 
 | ID | Elemento | STRIDE | Amenaza | I × P | Severidad |
 |---|---|---|---|---|---|
@@ -52,9 +52,9 @@ Dos amenazas, T-09 y T-10, no son errores de código sino reglas del negocio que
 
 **T-10** cuesta más verla. Antes de crear el préstamo, `pedir_prestamo` revisa que el equipo esté disponible y que el estudiante tenga menos de dos préstamos activos, y después guarda el préstamo (`main.py:125-151`). El problema es que entre revisar y guardar pasa un momento. Si llegan dos peticiones al mismo tiempo, las dos pasan las validaciones antes de que alguna guarde, y el mismo equipo queda prestado a dos personas.
 
-### Cómo calificamos
+### Cómo se calificó
 
-Para que las calificaciones no fueran a ojo, definimos un criterio y lo usamos igual en las 17 amenazas.
+Para que las calificaciones no fueran a ojo, se definió un criterio y se aplicó igual en las 17 amenazas.
 
 El **impacto** es 3 si la amenaza expone datos personales, permite tomar una cuenta o tomar el control de la aplicación; 2 si el daño es acotado, como retener equipos o mostrar información técnica; y 1 si es algo menor.
 
@@ -62,7 +62,7 @@ La **probabilidad** es 3 si basta una petición sin token o con el token de cual
 
 ## 3. ¿Qué se va a hacer al respecto? Top 5
 
-Cinco amenazas tienen riesgo 9, así que todas entraron al top 5. Para ordenarlas miramos qué tan fácil es explotarlas: las tres primeras no necesitan sesión, mientras que T4 y T5 necesitan el token de algún estudiante.
+Cinco amenazas tienen riesgo 9, así que todas entraron al top 5. Para ordenarlas se tuvo en cuenta qué tan fácil es explotarlas: las tres primeras no necesitan sesión, mientras que T4 y T5 necesitan el token de algún estudiante.
 
 | ID | Amenaza | STRIDE | I × P | Requisito de seguridad | ASVS 5.0 | Cómo se verifica |
 |---|---|---|---|---|---|---|
@@ -74,6 +74,6 @@ Cinco amenazas tienen riesgo 9, así que todas entraron al top 5. Para ordenarla
 
 ## 4. ¿Se hizo un buen trabajo?
 
-1. **Qué quedó fuera del modelo.** No modelamos el despliegue en producción (el proxy con TLS, el servidor y las copias de seguridad de la base), porque hoy la app solo corre en Docker en `127.0.0.1`. Tampoco el cambio ni la recuperación de contraseña, porque la app todavía no los tiene. Cuando existan, habría que agregarlos al modelo.
+1. **Qué quedó fuera del modelo.** No se modeló el despliegue en producción (el proxy con TLS, el servidor y las copias de seguridad de la base), porque hoy la app solo corre en Docker en `127.0.0.1`. Tampoco el cambio ni la recuperación de contraseña, porque la app todavía no los tiene. Cuando existan, habría que agregarlos al modelo.
 
-2. **Qué amenaza nos sorprendió.** T-02. Al principio parecía un simple detalle de configuración, pero el repositorio es público, así que cualquiera puede leer el secreto y firmar un token de administrador sin saber ninguna contraseña. Lo más grave es que eso tumba los demás controles de acceso: `solo_admin` revisa el rol que viene en el token, y ese rol lo escribe el atacante.
+2. **Qué amenaza sorprendió.** T-02. Al principio parecía un simple detalle de configuración, pero el repositorio es público, así que cualquiera puede leer el secreto y firmar un token de administrador sin saber ninguna contraseña. Lo más grave es que eso tumba los demás controles de acceso: `solo_admin` revisa el rol que viene en el token, y ese rol lo escribe el atacante.
