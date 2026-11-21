@@ -42,6 +42,8 @@ En los dos errores el gate respondió `⚠ Error` y no un verde: **nunca da un v
 | 🚦 **Security Gate** | ✅ success |
 | 🤖 AI triage (advisory) | ⏭ skipped (sin modelo) |
 
+![Primer run de Auditgate en main](evidencias/01-pipeline-main.png)
+
 El run pasa porque en un push a `main` lo único nuevo era el workflow. El PR #2 no se vio afectado: su último commit sigue siendo `73c29fd` y no tiene checks corridos.
 
 **Branch protection:** pendiente. Al marcar `auditgate / 🚦 Security Gate` como check requerido, el PR #2 quedaría bloqueado esperando el check, así que se activará cuando el PR #2 esté revisado. No se marcará *Require branches to be up to date*, para no forzar cambios en la rama del PR #2.
