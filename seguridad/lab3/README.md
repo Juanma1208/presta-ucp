@@ -48,7 +48,10 @@ El run pasa porque en un push a `main` lo único nuevo era el workflow. El PR #2
 
 **Branch protection:** pendiente. Al marcar `auditgate / 🚦 Security Gate` como check requerido, el PR #2 quedaría bloqueado esperando el check, así que se activará cuando el PR #2 esté revisado. No se marcará *Require branches to be up to date*, para no forzar cambios en la rama del PR #2.
 
-- [ ] Captura del workflow en el repo
+![Workflow commiteado en main](evidencias/02-workflow-main.png)
+
+- [x] Captura del workflow en el repo (`evidencias/02-workflow-main.png`)
+- [x] Captura del primer run en `main` (`evidencias/01-pipeline-main.png`)
 - [ ] Captura de la regla de branch protection
 
 ## Deuda vieja que el gate ve y no bloquea
@@ -66,7 +69,18 @@ Sin diff contra qué comparar, el SAST local marca todo como nuevo (fail-closed)
 
 ## 2. PR que el gate bloquea
 
-_Pendiente._
+**Antes de la falla.** En la rama `lab3/gate-seguridad`, con solo cambios de documentación respecto a `main` (base `32be498` → HEAD `e3b1978`), el gate pasa (`evidencias/03-scan-antes.txt`):
+
+| Control | Resultado |
+|---|---|
+| secrets (gitleaks) | 0 nuevos |
+| sast (semgrep) | 0 nuevos |
+| deps (osv-scanner) | 0 nuevos · 4 previas: deuda, no bloquea |
+| actions | fijadas por SHA |
+
+Con un diff real contra la base, la SQLi de `main.py:108` y el secreto de `auth.py` ya no aparecen como nuevos: son deuda de `main`.
+
+_Pendiente: la falla y el PR._
 
 ## 3. Triage y corrección
 
