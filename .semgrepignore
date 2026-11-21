@@ -1,0 +1,3 @@
+# Fixtures intencionalmente vulnerables (se prueban con semgrep --test)
+rules/
+tests/
