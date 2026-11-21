@@ -112,7 +112,7 @@ def listar_equipos(buscar: str = ""):
 @app.get("/equipos/tipo")
 def equipos_por_tipo(tipo: str = ""):
     con = conectar()
-    filas = con.execute(f"SELECT * FROM equipos WHERE tipo = '{tipo}'").fetchall()
+    filas = con.execute("SELECT * FROM equipos WHERE tipo = ?", (tipo,)).fetchall()
     con.close()
     return [dict(f) for f in filas]
 
