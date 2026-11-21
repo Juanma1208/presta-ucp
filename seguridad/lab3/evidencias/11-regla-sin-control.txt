@@ -1,0 +1,16 @@
+                   
+                   
+┌─────────────────┐
+│ 2 Code Findings │
+└─────────────────┘
+                              
+  [36m[22m[24m  app/auth.py[0m
+   ❯❯❱ rules.presta.jwt-secreto-en-codigo
+          [31m[1m[24m❰❰ Blocking ❱❱[0m
+          El JWT se firma o verifica con una clave escrita en el código. Quien lea el repositorio puede
+          fabricar tokens válidos. Lee la clave de una variable de entorno.                            
+                                                                                                       
+           24┆ return jwt.encode(datos, SECRET_KEY, algorithm=ALGORITMO)
+            ⋮┆----------------------------------------
+           29┆ datos = jwt.decode(credenciales.credentials, SECRET_KEY, algorithms=[ALGORITMO])
+

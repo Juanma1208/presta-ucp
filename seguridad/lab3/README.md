@@ -174,7 +174,52 @@ Un primer intento del scan local siguió bloqueando porque el fix estaba guardad
 
 ## 4. Regla propia con prueba
 
-_Pendiente._
+**Amenaza codificada:** T3 (T-02) del Lab 1, el secreto del JWT escrito en el código (`app/auth.py:8`). Con ese secreto, cualquiera que lea el repositorio puede firmar un token con `"rol": "admin"` y suplantar a cualquier usuario.
+
+**El patrón, no el bug.** La regla no busca la línea `SECRET_KEY = "presta-ucp-2026"`, sino cualquier `jwt.encode(...)` o `jwt.decode(...)` cuya clave sea un texto fijo, escrito directo o guardado antes en una constante. Semgrep sigue el valor de la constante hasta la llamada (propagación de constantes), así que el nombre de la variable no importa.
+
+| Archivo | Qué es |
+|---|---|
+| `rules/jwt-secreto-en-codigo.yml` | La regla `presta.jwt-secreto-en-codigo` (severidad `ERROR`, para que el gate bloquee) |
+| `rules/jwt-secreto-en-codigo.py` | Los fixtures: 3 casos `# ruleid:` que debe marcar y 2 casos `# ok:` que no debe marcar |
+| `.semgrepignore` | Excluye `rules/` y `tests/` del escaneo, para que el fixture vulnerable no bloquee el PR |
+
+```yaml
+pattern-either:
+  - pattern: jwt.encode($DATOS, "...", ...)
+  - pattern: jwt.decode($TOKEN, "...", ...)
+```
+
+**Los fixtures:**
+
+| Caso | Marca | Por qué |
+|---|---|---|
+| `jwt.encode(datos, "presta-ucp-2026", ...)` | `ruleid` | Clave literal en la llamada |
+| `jwt.encode(datos, SECRET_KEY, ...)` con `SECRET_KEY = "..."` | `ruleid` | Clave en una constante: el caso real de PrestaUCP |
+| `jwt.decode(token, CLAVE_FIRMA, ...)` con `CLAVE_FIRMA = "..."` | `ruleid` | Mismo patrón con un nombre en español |
+| `jwt.encode(datos, os.environ["JWT_SECRET"], ...)` | `ok` | La clave viene del entorno |
+| `jwt.decode(token, CLAVE_ENTORNO, ...)` con `CLAVE_ENTORNO = os.environ[...]` | `ok` | Constante, pero leída del entorno: no es un falso positivo |
+
+**La prueba:** `semgrep --test --metrics=off rules/` → `1/1: ✓ All tests passed`. El job `🧬 Rules + Tests` de Auditgate corre la misma prueba en cada PR y bloquea si falla.
+
+**Falla sin el control, pasa con él:**
+
+| Código | Hallazgos de la regla | Evidencia |
+|---|---|---|
+| `app/auth.py` de `main` (secreto en el código) | **2**: `jwt.encode` en la línea 24 y `jwt.decode` en la 29 | `evidencias/10-regla-sin-control.txt` |
+| `app/auth.py` del PR #2 (secreto desde `JWT_SECRET`, mínimo 32 bytes) | **0** | `evidencias/11-regla-con-control.txt` |
+
+**Por qué hacía falta una regla propia.** La regla genérica de Auditgate, `auditgate.python.hardcoded-credential`, decide por el **nombre** de la variable (`secret`, `password`, `token`, `api_key`…). Sobre los mismos fixtures marca `SECRET_KEY` pero **no** `CLAVE_FIRMA`: basta con nombrar la clave en español para esquivarla. La regla propia mira **dónde se usa** el valor (que llegue a `jwt.encode` o `jwt.decode`) y atrapa las dos variantes.
+
+![Regla genérica frente a la regla propia](evidencias/12-generica-vs-propia.png)
+
+**Trazabilidad:**
+
+| Amenaza (Lab 1) | Requisito ASVS 5.0 | Control | Prueba | Gate |
+|---|---|---|---|---|
+| T3 (T-02): secreto del JWT en el código, STRIDE S, 3 × 3 = 9 | V13 (secretos fuera del código) y V9 (tokens autocontenidos) | Regla `presta.jwt-secreto-en-codigo` | `semgrep --test rules/` con 3 `ruleid` y 2 `ok` | Job `🧬 Rules + Tests` y SAST del `🚦 Security Gate` |
+
+La corrección del código en sí está en el PR #2 (Lab 2). Esta regla evita que el patrón vuelva a entrar.
 
 ## 5. Reflexión
 
