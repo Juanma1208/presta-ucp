@@ -1,0 +1,38 @@
+# Semgrep · 2026-11-19 00:15:44 -0500 · commit 4d9c740
+$ semgrep scan --config p/python --config p/secrets --config p/owasp-top-ten --exclude seguridad --exclude .venv --metrics=off
+               
+               
+┌─────────────┐
+│ Scan Status │
+└─────────────┘
+  Scanning 17 files tracked by git with 599 Code rules:
+                                                                                                                        
+  Language      Rules   Files          Origin      Rules                                                                
+ ─────────────────────────────        ───────────────────                                                               
+  <multilang>      39      17          Community     599                                                                
+  python          151       4                                                                                           
+  js               65       1                                                                                           
+  yaml             24       1                                                                                           
+  dockerfile        4       1                                                                                           
+                                                                                                                        
+                
+                
+┌──────────────┐
+│ Scan Summary │
+└──────────────┘
+✅ Scan completed successfully.
+ • Findings: 0 (0 blocking)
+ • Rules run: 283
+ • Targets scanned: 17
+ • Parsed lines: ~100.0%
+ • Scan skipped: 
+   ◦ Matching --exclude patterns: 35
+   ◦ Files larger than  files 1.0 MB: 1
+   ◦ Files matching .semgrepignore patterns: 4
+ • Scan was limited to files tracked by git
+ • For a detailed list of skipped files and lines, run semgrep with the --verbose flag
+Ran 283 rules on 17 files: 0 findings.
+(need more rules? `semgrep login` for additional free Semgrep Registry rules)
+
+If Semgrep missed a finding, please send us feedback to let us know!
+See https://semgrep.dev/docs/reporting-false-negatives/

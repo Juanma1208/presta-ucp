@@ -1,0 +1,296 @@
+# pytest · código ORIGINAL (commit bdf1baa, sin correcciones) · 2026-11-19 00:01:39 -0500
+$ pytest -v
+============================= test session starts ==============================
+platform linux -- Python 3.14.4, pytest-9.2.0, pluggy-1.7.0 -- /home/juanm/presta-ucp/.venv/bin/python
+rootdir: /home/juanm/presta-ucp
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.16.0
+collecting ... collected 26 items
+
+tests/test_app.py::test_salud PASSED                                     [  3%]
+tests/test_app.py::test_registro_y_login PASSED                          [  7%]
+tests/test_app.py::test_login_con_clave_incorrecta PASSED                [ 11%]
+tests/test_app.py::test_mis_datos PASSED                                 [ 15%]
+tests/test_app.py::test_listar_y_buscar_equipos PASSED                   [ 19%]
+tests/test_app.py::test_solo_el_admin_crea_equipos PASSED                [ 23%]
+tests/test_app.py::test_pedir_prestamo PASSED                            [ 26%]
+tests/test_app.py::test_no_se_presta_un_equipo_ocupado PASSED            [ 30%]
+tests/test_app.py::test_maximo_dos_prestamos_activos PASSED              [ 34%]
+tests/test_app.py::test_mis_prestamos PASSED                             [ 38%]
+tests/test_app.py::test_ver_mi_prestamo PASSED                           [ 42%]
+tests/test_app.py::test_devolver_prestamo PASSED                         [ 46%]
+tests/test_app.py::test_sin_token_no_hay_acceso PASSED                   [ 50%]
+tests/test_lab2_top5.py::test_t1_union_no_devuelve_correos_ni_hashes FAILED [ 53%]
+tests/test_lab2_top5.py::test_t1_busqueda_con_apostrofo_funciona FAILED  [ 57%]
+tests/test_lab2_top5.py::test_t1_busqueda_normal_sigue_funcionando PASSED [ 61%]
+tests/test_lab2_top5.py::test_t2_registro_ignora_el_rol_del_cliente FAILED [ 65%]
+tests/test_lab2_top5.py::test_t3_token_forjado_con_el_secreto_viejo_es_rechazado FAILED [ 69%]
+tests/test_lab2_top5.py::test_t3_el_token_tiene_exp FAILED               [ 73%]
+tests/test_lab2_top5.py::test_t3_token_vencido_es_rechazado PASSED       [ 76%]
+tests/test_lab2_top5.py::test_t3_token_sin_exp_es_rechazado FAILED       [ 80%]
+tests/test_lab2_top5.py::test_t4_ana_no_ve_el_prestamo_de_beto FAILED    [ 84%]
+tests/test_lab2_top5.py::test_t4_prestamo_ajeno_responde_igual_que_uno_inexistente FAILED [ 88%]
+tests/test_lab2_top5.py::test_t4_ana_sigue_viendo_su_prestamo_y_el_admin_todos PASSED [ 92%]
+tests/test_lab2_top5.py::test_t5_un_estudiante_no_puede_devolver FAILED  [ 96%]
+tests/test_lab2_top5.py::test_t5_el_admin_si_puede_devolver PASSED       [100%]
+
+=================================== FAILURES ===================================
+_________________ test_t1_union_no_devuelve_correos_ni_hashes __________________
+
+cliente = <starlette.testclient.TestClient object at 0x742c477486b0>
+
+    def test_t1_union_no_devuelve_correos_ni_hashes(cliente):
+        r = cliente.get("/equipos", params={"buscar": SQL_UNION})
+        assert r.status_code == 200
+        texto = r.text
+>       assert "@presta.edu.co" not in texto
+E       assert '@presta.edu.co' not in '[{"id":1,"n...ponible":1}]'
+E         
+E         '@presta.edu.co' is contained here:
+E           [{"id":1,"nombre":"Portátil Lenovo ThinkPad","tipo":"portatil","disponible":0},{"id":1,"nombre":"admin@presta.edu.co","tipo":"0192023a7bbd73250516f069df18b500","disponible":"admin"},{"id":2,"nombre":"Portátil Dell Latitude","tipo":"portatil","disponible":1},{"id":2,"nombre":"ana@presta.edu.co","tipo":"e4e0bc2ca5e8b32f7f80be62097cb973","disponible":"estudiante"},{"id":3,"nombre":"Cámara Canon EOS","tipo":"camara","disponible":0},{"id":3,"nombre":"beto@presta.edu.co","tipo":"daa75bce97e2c8feaa53ba17b477089d","disponible":"estudiante"},{"id":4,"nom...
+E         
+E         ...Full output truncated, use '-vv' to show
+
+tests/test_lab2_top5.py:22: AssertionError
+___________________ test_t1_busqueda_con_apostrofo_funciona ____________________
+
+cliente = <starlette.testclient.TestClient object at 0x742c47748490>
+
+    def test_t1_busqueda_con_apostrofo_funciona(cliente):
+>       r = cliente.get("/equipos", params={"buscar": "D'Ángel"})
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_lab2_top5.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.14/site-packages/httpx/_client.py:1053: in get
+    return self.request(
+.venv/lib/python3.14/site-packages/starlette/testclient.py:518: in request
+    return super().request(
+.venv/lib/python3.14/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_client.py:928: in send
+    raise exc
+.venv/lib/python3.14/site-packages/httpx/_client.py:922: in send
+    response.read()
+.venv/lib/python3.14/site-packages/httpx/_models.py:881: in read
+    self._content = b"".join(self.iter_bytes())
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_models.py:897: in iter_bytes
+    for raw_bytes in self.iter_raw():
+                     ^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_models.py:951: in iter_raw
+    for raw_stream_bytes in self.stream:
+                            ^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_client.py:153: in __iter__
+    for chunk in self._stream:
+                 ^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/starlette/testclient.py:384: in iter_body
+    exit_stack.close()
+/usr/lib/python3.14/contextlib.py:627: in close
+    self.__exit__(None, None, None)
+/usr/lib/python3.14/contextlib.py:619: in __exit__
+    raise exc
+/usr/lib/python3.14/contextlib.py:604: in __exit__
+    if cb(*exc_details):
+       ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/starlette/testclient.py:399: in close_app
+    raise exception
+.venv/lib/python3.14/site-packages/anyio/from_thread.py:272: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/starlette/testclient.py:366: in run_app
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/applications.py:1194: in __call__
+    await super().__call__(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv/lib/python3.14/site-packages/fastapi/telemetry/_asgi.py:151: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/cors.py:91: in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+.venv/lib/python3.14/site-packages/starlette/middleware/cors.py:149: in simple_response
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:683: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:2811: in app
+    await route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:1330: in handle
+    await super().handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:289: in handle
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:166: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:152: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/routing.py:745: in app
+    raw_response = await run_endpoint_function(
+.venv/lib/python3.14/site-packages/fastapi/routing.py:374: in run_endpoint_function
+    return await run_in_threadpool(
+.venv/lib/python3.14/site-packages/starlette/concurrency.py:34: in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/anyio/to_thread.py:65: in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py:2779: in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py:1124: in run
+    result = context.run(func, *args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/telemetry/_api.py:244: in _run_sync_endpoint
+    return function(**arguments)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+buscar = "D'Ángel"
+
+    @app.get("/equipos")
+    def listar_equipos(buscar: str = ""):
+        con = conectar()
+>       filas = con.execute(f"SELECT * FROM equipos WHERE nombre LIKE '%{buscar}%'").fetchall()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       sqlite3.OperationalError: near "Ángel": syntax error
+
+app/main.py:108: OperationalError
+__________________ test_t2_registro_ignora_el_rol_del_cliente __________________
+
+cliente = <starlette.testclient.TestClient object at 0x742c478b3ce0>
+
+    def test_t2_registro_ignora_el_rol_del_cliente(cliente):
+        r = cliente.post(
+            "/registro",
+            json={"nombre": "Intruso", "documento": "222", "correo": "intruso@presta.edu.co",
+                  "telefono": "301", "clave": "clave1234", "rol": "admin"},
+        )
+        assert r.status_code == 201
+>       assert r.json()["rol"] == "estudiante"
+E       AssertionError: assert 'admin' == 'estudiante'
+E         
+E         - estudiante
+E         + admin
+
+tests/test_lab2_top5.py:47: AssertionError
+___________ test_t3_token_forjado_con_el_secreto_viejo_es_rechazado ____________
+
+cliente = <starlette.testclient.TestClient object at 0x742c478b2030>
+
+    def test_t3_token_forjado_con_el_secreto_viejo_es_rechazado(cliente):
+        exp = datetime.now(timezone.utc) + timedelta(hours=1)
+        forjado = jwt.encode({"sub": "999", "rol": "admin", "exp": exp}, SECRETO_VIEJO, algorithm="HS256")
+        r = cliente.post("/equipos", json={"nombre": "x", "tipo": "y"},
+                         headers={"Authorization": f"Bearer {forjado}"})
+>       assert r.status_code == 401
+E       assert 201 == 401
+E        +  where 201 = <Response [201 Created]>.status_code
+
+tests/test_lab2_top5.py:61: AssertionError
+__________________________ test_t3_el_token_tiene_exp __________________________
+
+cliente = <starlette.testclient.TestClient object at 0x742c478b3df0>
+ana = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwicm9sIjoiZXN0dWRpYW50ZSJ9.Z8OOcdmB8RYchP0Qf6wKd2RiztVsVgs7TsgQ0a-1V-U'}
+
+    def test_t3_el_token_tiene_exp(cliente, ana):
+        datos = jwt.decode(ana["Authorization"].split()[1], options={"verify_signature": False})
+>       assert "exp" in datos
+E       AssertionError: assert 'exp' in {'sub': '2', 'rol': 'estudiante'}
+
+tests/test_lab2_top5.py:66: AssertionError
+______________________ test_t3_token_sin_exp_es_rechazado ______________________
+
+cliente = <starlette.testclient.TestClient object at 0x742c478b3020>
+
+    def test_t3_token_sin_exp_es_rechazado(cliente):
+        from app.auth import ALGORITMO, SECRET_KEY
+    
+        sin_exp = jwt.encode({"sub": "2", "rol": "estudiante"}, SECRET_KEY, algorithm=ALGORITMO)
+        r = cliente.get("/me", headers={"Authorization": f"Bearer {sin_exp}"})
+>       assert r.status_code == 401
+E       assert 200 == 401
+E        +  where 200 = <Response [200 OK]>.status_code
+
+tests/test_lab2_top5.py:85: AssertionError
+____________________ test_t4_ana_no_ve_el_prestamo_de_beto _____________________
+
+cliente = <starlette.testclient.TestClient object at 0x742c478b2f10>
+ana = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwicm9sIjoiZXN0dWRpYW50ZSJ9.Z8OOcdmB8RYchP0Qf6wKd2RiztVsVgs7TsgQ0a-1V-U'}
+
+    def test_t4_ana_no_ve_el_prestamo_de_beto(cliente, ana):
+        r = cliente.get("/prestamos/2", headers=ana)
+>       assert r.status_code == 404
+E       assert 200 == 404
+E        +  where 200 = <Response [200 OK]>.status_code
+
+tests/test_lab2_top5.py:92: AssertionError
+__________ test_t4_prestamo_ajeno_responde_igual_que_uno_inexistente ___________
+
+cliente = <starlette.testclient.TestClient object at 0x742c478b2ad0>
+ana = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwicm9sIjoiZXN0dWRpYW50ZSJ9.Z8OOcdmB8RYchP0Qf6wKd2RiztVsVgs7TsgQ0a-1V-U'}
+
+    def test_t4_prestamo_ajeno_responde_igual_que_uno_inexistente(cliente, ana):
+        ajeno = cliente.get("/prestamos/2", headers=ana)
+        inexistente = cliente.get("/prestamos/999", headers=ana)
+>       assert ajeno.status_code == inexistente.status_code == 404
+E       assert 200 == 404
+E        +  where 200 = <Response [200 OK]>.status_code
+E        +  and   404 = <Response [404 Not Found]>.status_code
+
+tests/test_lab2_top5.py:100: AssertionError
+___________________ test_t5_un_estudiante_no_puede_devolver ____________________
+
+cliente = <starlette.testclient.TestClient object at 0x742c478b3460>
+ana = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwicm9sIjoiZXN0dWRpYW50ZSJ9.Z8OOcdmB8RYchP0Qf6wKd2RiztVsVgs7TsgQ0a-1V-U'}
+beto = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwicm9sIjoiZXN0dWRpYW50ZSJ9.F_DlaR1jGY7125VtBNCj4PZN6RZGXIb5LwO2RIPX8BI'}
+
+    def test_t5_un_estudiante_no_puede_devolver(cliente, ana, beto):
+        r = cliente.post("/prestamos/2/devolver", headers=beto)
+>       assert r.status_code == 403
+E       assert 200 == 403
+E        +  where 200 = <Response [200 OK]>.status_code
+
+tests/test_lab2_top5.py:113: AssertionError
+=============================== warnings summary ===============================
+.venv/lib/python3.14/site-packages/fastapi/testclient.py:1
+  /home/juanm/presta-ucp/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_app.py: 9 warnings
+tests/test_lab2_top5.py: 9 warnings
+  /home/juanm/presta-ucp/.venv/lib/python3.14/site-packages/jwt/api_jwt.py:149: InsecureKeyLengthWarning: The HMAC key is 15 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+tests/test_app.py: 8 warnings
+tests/test_lab2_top5.py: 8 warnings
+  /home/juanm/presta-ucp/.venv/lib/python3.14/site-packages/jwt/api_jwt.py:370: InsecureKeyLengthWarning: The HMAC key is 15 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    decoded = self.decode_complete(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_lab2_top5.py::test_t1_union_no_devuelve_correos_ni_hashes
+FAILED tests/test_lab2_top5.py::test_t1_busqueda_con_apostrofo_funciona - sql...
+FAILED tests/test_lab2_top5.py::test_t2_registro_ignora_el_rol_del_cliente - ...
+FAILED tests/test_lab2_top5.py::test_t3_token_forjado_con_el_secreto_viejo_es_rechazado
+FAILED tests/test_lab2_top5.py::test_t3_el_token_tiene_exp - AssertionError: ...
+FAILED tests/test_lab2_top5.py::test_t3_token_sin_exp_es_rechazado - assert 2...
+FAILED tests/test_lab2_top5.py::test_t4_ana_no_ve_el_prestamo_de_beto - asser...
+FAILED tests/test_lab2_top5.py::test_t4_prestamo_ajeno_responde_igual_que_uno_inexistente
+FAILED tests/test_lab2_top5.py::test_t5_un_estudiante_no_puede_devolver - ass...
+================== 9 failed, 17 passed, 35 warnings in 0.69s ===================

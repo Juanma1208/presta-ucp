@@ -27,7 +27,7 @@ echo '## Login repetido 12 veces con clave incorrecta: ningun 429'
 run "for i in \$(seq 12); do curl -s -o /dev/null -w '%{http_code} ' -X POST $B/login -H '$J' -d '{\"correo\":\"ana@presta.edu.co\",\"clave\":\"mala\"}'; done; echo"
 
 paso "Fila 2 y 12 · El registro devuelve el hash MD5 de la contrasena (ASVS 11.4.2, 15.3.1)"
-echo "MD5 de '1' = $(printf 1 | md5sum | cut -d' ' -f1)  (coincide con el campo clave de arriba)"
+echo "MD5 de '1' = $(printf 1 | md5sum | cut -d' ' -f1)  (si coincide con el campo clave de arriba, la contrasena se guarda en MD5)"
 
 paso "Fila 4 · El login distingue correo inexistente de clave incorrecta (ASVS 6.3.8)"
 run "curl -s -o /dev/null -w 'correo que no existe -> HTTP %{http_code}\n' -X POST $B/login -H '$J' -d '{\"correo\":\"nadie@x.co\",\"clave\":\"x\"}'"
@@ -39,7 +39,7 @@ run "curl -s -X POST $B/registro -H '$J' -d '{\"nombre\":\"Intruso\",\"documento
 paso "Fila 7 y 17 · El secreto del JWT esta en el codigo (ASVS 9.1.2, 13.3.1) [T3 del Lab 1]"
 run "grep -n 'SECRET_KEY' app/auth.py"
 echo '## Token forjado con ese secreto, con rol admin, aceptado por una ruta de administrador'
-run "python3 -c \"import jwt; print(jwt.encode({'sub':'999','rol':'admin'},'presta-ucp-2026',algorithm='HS256'))\" > /tmp/tok.txt; curl -s -o /dev/null -w 'POST /equipos con token forjado -> HTTP %{http_code}\n' -X POST $B/equipos -H '$J' -H \"Authorization: Bearer \$(cat /tmp/tok.txt)\" -d '{\"nombre\":\"x\",\"tipo\":\"y\"}'"
+run "python3 -c \"import jwt; print(jwt.encode({'sub':'999','rol':'admin','exp':4102444800},'presta-ucp-2026',algorithm='HS256'))\" > /tmp/tok.txt; curl -s -o /dev/null -w 'POST /equipos con token forjado -> HTTP %{http_code}\n' -X POST $B/equipos -H '$J' -H \"Authorization: Bearer \$(cat /tmp/tok.txt)\" -d '{\"nombre\":\"x\",\"tipo\":\"y\"}'"
 
 paso "Fila 8 · El token no tiene expiracion (ASVS 9.2.1) [T3 del Lab 1]"
 run "python3 -c \"import jwt; t='$(token ana@presta.edu.co ana12345)'; print(sorted(jwt.decode(t,options={'verify_signature':False}).keys()))\""

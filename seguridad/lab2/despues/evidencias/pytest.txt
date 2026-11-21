@@ -1,0 +1,59 @@
+# pytest · código CORREGIDO (commit 4d9c740) · 2026-11-19 00:15:43 -0500
+$ pytest -v
+============================= test session starts ==============================
+platform linux -- Python 3.14.4, pytest-9.2.0, pluggy-1.7.0 -- /home/juanm/presta-ucp/.venv/bin/python
+rootdir: /home/juanm/presta-ucp
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.16.0
+collecting ... collected 37 items
+
+tests/test_app.py::test_salud PASSED                                     [  2%]
+tests/test_app.py::test_registro_y_login PASSED                          [  5%]
+tests/test_app.py::test_login_con_clave_incorrecta PASSED                [  8%]
+tests/test_app.py::test_mis_datos PASSED                                 [ 10%]
+tests/test_app.py::test_listar_y_buscar_equipos PASSED                   [ 13%]
+tests/test_app.py::test_solo_el_admin_crea_equipos PASSED                [ 16%]
+tests/test_app.py::test_pedir_prestamo PASSED                            [ 18%]
+tests/test_app.py::test_no_se_presta_un_equipo_ocupado PASSED            [ 21%]
+tests/test_app.py::test_maximo_dos_prestamos_activos PASSED              [ 24%]
+tests/test_app.py::test_mis_prestamos PASSED                             [ 27%]
+tests/test_app.py::test_ver_mi_prestamo PASSED                           [ 29%]
+tests/test_app.py::test_devolver_prestamo PASSED                         [ 32%]
+tests/test_app.py::test_sin_token_no_hay_acceso PASSED                   [ 35%]
+tests/test_lab2_config.py::test_fila2_la_clave_no_se_guarda_con_md5 PASSED [ 37%]
+tests/test_lab2_config.py::test_fila2_la_misma_clave_da_hashes_distintos_por_la_sal PASSED [ 40%]
+tests/test_lab2_config.py::test_fila2_el_login_sigue_funcionando PASSED  [ 43%]
+tests/test_lab2_config.py::test_fila19_cors_no_acepta_un_origen_cualquiera PASSED [ 45%]
+tests/test_lab2_config.py::test_fila19_cabeceras_de_seguridad_en_la_api PASSED [ 48%]
+tests/test_lab2_config.py::test_fila19_las_respuestas_con_datos_personales_no_se_guardan_en_cache PASSED [ 51%]
+tests/test_lab2_config.py::test_fila19_docs_funciona_sin_scripts_de_otro_dominio PASSED [ 54%]
+tests/test_lab2_config.py::test_fila19_debug_apagado PASSED              [ 56%]
+tests/test_lab2_config.py::test_fila19_correo_repetido_responde_409_sin_traza PASSED [ 59%]
+tests/test_lab2_config.py::test_fila19_tras_un_error_la_base_no_queda_bloqueada PASSED [ 62%]
+tests/test_lab2_config.py::test_fila19_dockerfile_usa_un_usuario_sin_privilegios PASSED [ 64%]
+tests/test_lab2_top5.py::test_t1_union_no_devuelve_correos_ni_hashes PASSED [ 67%]
+tests/test_lab2_top5.py::test_t1_busqueda_con_apostrofo_funciona PASSED  [ 70%]
+tests/test_lab2_top5.py::test_t1_busqueda_normal_sigue_funcionando PASSED [ 72%]
+tests/test_lab2_top5.py::test_t2_registro_ignora_el_rol_del_cliente PASSED [ 75%]
+tests/test_lab2_top5.py::test_t3_token_forjado_con_el_secreto_viejo_es_rechazado PASSED [ 78%]
+tests/test_lab2_top5.py::test_t3_el_token_tiene_exp PASSED               [ 81%]
+tests/test_lab2_top5.py::test_t3_token_vencido_es_rechazado PASSED       [ 83%]
+tests/test_lab2_top5.py::test_t3_token_sin_exp_es_rechazado PASSED       [ 86%]
+tests/test_lab2_top5.py::test_t4_ana_no_ve_el_prestamo_de_beto PASSED    [ 89%]
+tests/test_lab2_top5.py::test_t4_prestamo_ajeno_responde_igual_que_uno_inexistente PASSED [ 91%]
+tests/test_lab2_top5.py::test_t4_ana_sigue_viendo_su_prestamo_y_el_admin_todos PASSED [ 94%]
+tests/test_lab2_top5.py::test_t5_un_estudiante_no_puede_devolver PASSED  [ 97%]
+tests/test_lab2_top5.py::test_t5_el_admin_si_puede_devolver PASSED       [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.14/site-packages/fastapi/testclient.py:1
+  /home/juanm/presta-ucp/.venv/lib/python3.14/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_lab2_top5.py::test_t3_token_forjado_con_el_secreto_viejo_es_rechazado
+  /home/juanm/presta-ucp/.venv/lib/python3.14/site-packages/jwt/api_jwt.py:149: InsecureKeyLengthWarning: The HMAC key is 15 bytes long, which is below the minimum recommended length of 32 bytes for SHA256. See RFC 7518 Section 3.2.
+    return self._jws.encode(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 37 passed, 2 warnings in 0.60s ========================
