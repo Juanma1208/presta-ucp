@@ -46,13 +46,30 @@ En los dos errores el gate respondió `⚠ Error` y no un verde: **nunca da un v
 
 El run pasa porque en un push a `main` lo único nuevo era el workflow. El PR #2 no se vio afectado: su último commit sigue siendo `73c29fd` y no tiene checks corridos.
 
-**Branch protection:** pendiente. Al marcar `auditgate / 🚦 Security Gate` como check requerido, el PR #2 quedaría bloqueado esperando el check, así que se activará cuando el PR #2 esté revisado. No se marcará *Require branches to be up to date*, para no forzar cambios en la rama del PR #2.
-
 ![Workflow commiteado en main](evidencias/02-workflow-main.png)
+
+**Branch protection.** Se configuró con un *ruleset* de GitHub (la versión nueva de branch protection) llamado `main`:
+
+| Opción | Valor | Por qué |
+|---|---|---|
+| Enforcement status | **Active** | Sin esto la regla existe pero no se aplica |
+| Target branches | Rama por defecto (`main`) | Es la rama a la que llegan los PR |
+| Require status checks to pass | **`auditgate / 🚦 Security Gate`** | El único check que decide el merge. Sin esto el gate avisa pero no bloquea |
+| Require branches to be up to date | No | Evita forzar cambios en la rama del PR #2, que está pendiente de revisión |
+| Block force pushes y bloqueo de borrado | Sí | Nadie puede reescribir ni borrar el historial de `main` |
+| Bypass list | Repository admin | El dueño puede mergear el PR #2, que no tiene checks corridos, si el docente lo aprueba |
+
+La regla no cambia el código de ninguna rama ni mergea nada sola: habilita o bloquea el botón de merge según el resultado del gate. Con la regla activa, el PR #3 queda en estado `CLEAN` (gate en verde, se puede mergear), mientras que un PR con un hallazgo nuevo queda bloqueado.
+
+En el primer intento el ruleset quedó en `Disabled` y sin rama objetivo (*«This ruleset does not target any resources and will not be applied»*), así que no protegía nada. Se corrigió y se verificó con la API de GitHub que esté `active` sobre `~DEFAULT_BRANCH`.
+
+![Ruleset activo sobre main](evidencias/16-branch-protection.png)
+
+![Security Gate como check requerido](evidencias/17-branch-protection.png)
 
 - [x] Captura del workflow en el repo (`evidencias/02-workflow-main.png`)
 - [x] Captura del primer run en `main` (`evidencias/01-pipeline-main.png`)
-- [ ] Captura de la regla de branch protection
+- [x] Captura de la regla de branch protection (`evidencias/16-branch-protection.png` y `evidencias/17-branch-protection.png`)
 
 ## Deuda vieja que el gate ve y no bloquea
 
@@ -66,6 +83,16 @@ Un `auditgate scan` local parado en `main` (base = HEAD) muestra lo que ya exist
 | 4 vulnerabilidades en dependencias (PyPI) | OSV-Scanner: «previas: deuda, no bloquea» | No estaba en el top 5 |
 
 Sin diff contra qué comparar, el SAST local marca todo como nuevo (fail-closed), mientras que OSV-Scanner ya separa las 4 vulnerabilidades como deuda. En CI, el push a `main` pasó en verde. Esta deuda se está corrigiendo en el PR #2; el gate evita que se **agregue** más.
+
+En Code Scanning (pestaña *Security*) la deuda de `main` suma 281 alertas abiertas, y ninguna bloquea un PR porque no son nuevas:
+
+| Herramienta | Alertas | Qué son |
+|---|---|---|
+| Trivy | 240 | Paquetes del sistema operativo con CVE dentro de la imagen base de Docker |
+| Gitleaks | 33 | Tokens JWT y cabeceras `Authorization` copiados en las evidencias del Lab 2 (`seguridad/lab2/.../curl.txt` y `pytest.txt`) |
+| Semgrep OSS y Bandit | 8 | T1 (`main.py:108`), T3 (`auth.py:8` y `auth.py:24`), el hash MD5 de las contraseñas (`auth.py:15`) y CORS con comodín (`main.py:31`) |
+
+Los tokens de las evidencias se firmaron con el secreto `presta-ucp-2026`, que ya está expuesto en el código (T3), así que no abren un acceso nuevo. Aun así, queda como lección para el Entregable 2: las evidencias no deben llevar tokens sin redactar.
 
 ## 2. PR que el gate bloquea
 
@@ -233,6 +260,27 @@ pattern-either:
 
 La corrección del código en sí está en el PR #2 (Lab 2). Esta regla evita que el patrón vuelva a entrar.
 
+**En CI.** Con la regla en el PR #3 (run `44922285712`), el job `🧬 Rules + Tests + Pipeline integrity` ejecutó el paso **«Las reglas propias del repo tienen tests y pasan (Codify)» → success**, y el `🚦 Security Gate` siguió en verde. La regla sí ve `auth.py:24` y `auth.py:29`, pero no bloquea porque esos hallazgos ya existían en `main`: son deuda que corrige el PR #2. El fixture vulnerable no se escanea gracias a `.semgrepignore`.
+
+![Run del PR en verde con la regla](evidencias/14-pr-checks-verde.png)
+
+![Job Rules + Tests: las reglas propias del repo pasan](evidencias/15-rules-tests-ci.png)
+
 ## 5. Reflexión
 
-_Pendiente._
+**¿Qué hallazgo bloqueó el gate que una persona habría dejado pasar?** La SQLi del endpoint nuevo `GET /equipos/tipo` (`app/main.py:115`), el mismo patrón de T1. El commit se llamaba `feat: filtrar equipos por tipo` y copiaba la forma de `listar_equipos`, que ya estaba en el archivo, por eso en una revisión se veía como código normal. Aun así, el endpoint no pedía autenticación y un visitante anónimo podía sacar el correo, el hash de la contraseña y el rol de todas las cuentas con una sola petición.
+
+**¿El triage acertó en el verdadero o falso positivo?** Como no se configuró el agente de IA, el triage se hizo a mano y se comprobó con una prueba de concepto. Era un verdadero positivo: antes del fix, el `UNION SELECT` devolvía las credenciales, y después de parametrizar la consulta la misma petición devolvió `[]`. En el PR no hubo falsos positivos, aunque sí un vacío: la regla de taint de Semgrep está hecha para Flask y no marcó la falla en FastAPI. Por eso se escribió una regla propia para T3, que no depende del nombre de la variable.
+
+**¿Qué deuda vieja dejó pasar el gate y por qué está bien?** Dejó pasar la SQLi de `GET /equipos?buscar=` (T1, `main.py:108`), el secreto del JWT (T3, `auth.py:8`) y 4 vulnerabilidades en dependencias, porque ya estaban en `main` y no las introdujo el PR. Está bien porque, si el gate bloqueara la deuda vieja, ningún PR se podría mergear hasta arreglar todo, y el equipo terminaría ignorándolo. La deuda sigue visible en Code Scanning y su corrección está en el PR #2, mientras que el gate evita que se agregue más.
+
+## Entrega
+
+| Pide la guía | Dónde está |
+|---|---|
+| 1. Workflow `auditgate.yml` commiteado y branch protection con `Security Gate` requerido | `.github/workflows/auditgate.yml` en `main` (commit `32be498`) · sección 1 · `evidencias/02`, `16` y `17` |
+| 2. PR bloqueado por el gate y luego en verde tras el fix | [PR #3](https://github.com/Juanma1208/presta-ucp/pull/3) · secciones 2 y 3 · `evidencias/05`, `06`, `10` y `14` |
+| 3. Regla con dos fixtures y la prueba que pasa | `rules/jwt-secreto-en-codigo.yml` y `rules/jwt-secreto-en-codigo.py` · sección 4 · `evidencias/11`, `12`, `13` y `15` |
+| 4. Tres líneas de reflexión | Sección 5 |
+
+El PR #3 queda abierto como evidencia y no se mergea por ahora. El PR #2 (Lab 2) no se modificó en ningún paso de este laboratorio.
