@@ -78,6 +78,8 @@ Sin diff contra qué comparar, el SAST local marca todo como nuevo (fail-closed)
 | deps (osv-scanner) | 0 nuevos · 4 previas: deuda, no bloquea |
 | actions | fijadas por SHA |
 
+![Scan local antes de la falla](evidencias/03-scan-antes.png)
+
 Con un diff real contra la base, la SQLi de `main.py:108` y el secreto de `auth.py` ya no aparecen como nuevos: son deuda de `main`.
 
 **La falla.** El commit `8facf14` (`feat: filtrar equipos por tipo`) agrega un endpoint nuevo, `GET /equipos/tipo`, que arma el SQL con un f-string. Es el mismo patrón de T1 (SQLi), en un lugar donde antes no existía:
@@ -159,6 +161,8 @@ El hallazgo no es teórico: un visitante sin cuenta extrae las credenciales de t
 +    filas = con.execute("SELECT * FROM equipos WHERE tipo = ?", (tipo,)).fetchall()
 ```
 
+![Código corregido con consulta parametrizada](evidencias/09-codigo-fix.png)
+
 **Prueba después del fix** (el mismo cliente de pruebas, sobre una base temporal):
 
 | Petición | Antes | Después |
@@ -168,9 +172,13 @@ El hallazgo no es teórico: un visitante sin cuenta extrae las credenciales de t
 
 **El gate pasa a verde.** Con el fix commiteado (`935fafb`), el scan local da `✅ Pasa` con `sast 0 nuevos` (`evidencias/08-scan-fix.txt`). Después del push, todos los checks del PR #3 pasan: **🚦 Security Gate ✅**, SAST, Semgrep OSS, Bandit, gitleaks, Trivy y Hadolint en verde, e IaC omitido.
 
+![Scan local después del fix](evidencias/08-scan-fix.png)
+
+![Run del PR en verde tras el fix](evidencias/10-pr-checks-verde.png)
+
 Un primer intento del scan local siguió bloqueando porque el fix estaba guardado en disco pero no commiteado: el gate evalúa lo que entra al repositorio, no lo que hay en el editor.
 
-- [ ] Captura de los checks del PR en verde (`evidencias/09-pr-checks-verde.png`)
+- [x] Captura de los checks del PR en verde (`evidencias/10-pr-checks-verde.png`)
 
 ## 4. Regla propia con prueba
 
@@ -206,12 +214,16 @@ pattern-either:
 
 | Código | Hallazgos de la regla | Evidencia |
 |---|---|---|
-| `app/auth.py` de `main` (secreto en el código) | **2**: `jwt.encode` en la línea 24 y `jwt.decode` en la 29 | `evidencias/10-regla-sin-control.txt` |
-| `app/auth.py` del PR #2 (secreto desde `JWT_SECRET`, mínimo 32 bytes) | **0** | `evidencias/11-regla-con-control.txt` |
+| `app/auth.py` de `main` (secreto en el código) | **2**: `jwt.encode` en la línea 24 y `jwt.decode` en la 29 | `evidencias/11-regla-sin-control.txt` |
+| `app/auth.py` del PR #2 (secreto desde `JWT_SECRET`, mínimo 32 bytes) | **0** | `evidencias/12-regla-con-control.txt` |
+
+![La regla sobre auth.py de main: 2 hallazgos](evidencias/11-regla-sin-control.png)
+
+![La regla sobre auth.py corregido: 0 hallazgos](evidencias/12-regla-con-control.png)
 
 **Por qué hacía falta una regla propia.** La regla genérica de Auditgate, `auditgate.python.hardcoded-credential`, decide por el **nombre** de la variable (`secret`, `password`, `token`, `api_key`…). Sobre los mismos fixtures marca `SECRET_KEY` pero **no** `CLAVE_FIRMA`: basta con nombrar la clave en español para esquivarla. La regla propia mira **dónde se usa** el valor (que llegue a `jwt.encode` o `jwt.decode`) y atrapa las dos variantes.
 
-![Regla genérica frente a la regla propia](evidencias/12-generica-vs-propia.png)
+![Regla genérica frente a la regla propia](evidencias/13-generica-vs-propia.png)
 
 **Trazabilidad:**
 
