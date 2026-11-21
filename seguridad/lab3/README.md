@@ -166,7 +166,11 @@ El hallazgo no es teórico: un visitante sin cuenta extrae las credenciales de t
 | `?tipo=portatil` | `200`, 2 equipos | `200`, 2 equipos: la búsqueda legítima sigue funcionando |
 | `?tipo=' UNION SELECT id, correo, clave, rol FROM usuarios--` | `200`, correos, hashes y roles | `200`, `[]`: busca un equipo cuyo tipo sea literalmente ese texto y no encuentra ninguno |
 
-_Pendiente: el gate en verde en el PR._
+**El gate pasa a verde.** Con el fix commiteado (`935fafb`), el scan local da `✅ Pasa` con `sast 0 nuevos` (`evidencias/08-scan-fix.txt`). Después del push, todos los checks del PR #3 pasan: **🚦 Security Gate ✅**, SAST, Semgrep OSS, Bandit, gitleaks, Trivy y Hadolint en verde, e IaC omitido.
+
+Un primer intento del scan local siguió bloqueando porque el fix estaba guardado en disco pero no commiteado: el gate evalúa lo que entra al repositorio, no lo que hay en el editor.
+
+- [ ] Captura de los checks del PR en verde (`evidencias/09-pr-checks-verde.png`)
 
 ## 4. Regla propia con prueba
 
