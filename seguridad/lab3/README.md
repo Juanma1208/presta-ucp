@@ -80,7 +80,32 @@ Sin diff contra qué comparar, el SAST local marca todo como nuevo (fail-closed)
 
 Con un diff real contra la base, la SQLi de `main.py:108` y el secreto de `auth.py` ya no aparecen como nuevos: son deuda de `main`.
 
-_Pendiente: la falla y el PR._
+**La falla.** El commit `8facf14` (`feat: filtrar equipos por tipo`) agrega un endpoint nuevo, `GET /equipos/tipo`, que arma el SQL con un f-string. Es el mismo patrón de T1 (SQLi), en un lugar donde antes no existía:
+
+```python
+@app.get("/equipos/tipo")
+def equipos_por_tipo(tipo: str = ""):
+    con = conectar()
+    filas = con.execute(f"SELECT * FROM equipos WHERE tipo = '{tipo}'").fetchall()
+    con.close()
+    return [dict(f) for f in filas]
+```
+
+**El gate local bloquea** (`evidencias/04-scan-falla.txt`, base `32be498` → HEAD `8facf14`):
+
+```
+✖ sast     semgrep    1 nuevo(s) — BLOQUEA
+    app/main.py:115  auditgate.flask.sqli-string-built-query
+🚫 Bloqueado: 1 hallazgo(s) nuevo(s).
+```
+
+![Scan local con la falla](evidencias/04-scan-falla.png)
+
+Solo sale el hallazgo **nuevo** (`main.py:115`). La SQLi vieja de `main.py:108` sigue en el código pero no bloquea, porque ya estaba en `main`.
+
+A diferencia de la demo en Flask, aquí la detecta **una sola regla**: la propia de Auditgate (`sqli-string-built-query`), que busca el patrón `execute(f"...")` sin importar el framework. La regla de taint del registro de Semgrep (`tainted-sql-string`) no la marca, porque reconoce como fuente `request.args` de Flask y no los parámetros de consulta de FastAPI.
+
+_Pendiente: el PR en GitHub._
 
 ## 3. Triage y corrección
 
