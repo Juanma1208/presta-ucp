@@ -91,6 +91,8 @@ def equipos_por_tipo(tipo: str = ""):
     return [dict(f) for f in filas]
 ```
 
+![Código vulnerable del endpoint nuevo](evidencias/07-fallo-codigo.png)
+
 **El gate local bloquea** (`evidencias/04-scan-falla.txt`, base `32be498` → HEAD `8facf14`):
 
 ```
@@ -105,11 +107,66 @@ Solo sale el hallazgo **nuevo** (`main.py:115`). La SQLi vieja de `main.py:108` 
 
 A diferencia de la demo en Flask, aquí la detecta **una sola regla**: la propia de Auditgate (`sqli-string-built-query`), que busca el patrón `execute(f"...")` sin importar el framework. La regla de taint del registro de Semgrep (`tainted-sql-string`) no la marca, porque reconoce como fuente `request.args` de Flask y no los parámetros de consulta de FastAPI.
 
-_Pendiente: el PR en GitHub._
+**El gate en GitHub bloquea.** En el PR #3 (`lab3/gate-seguridad` → `main`):
+
+| Check | Resultado | Qué es |
+|---|---|---|
+| 🚦 **Security Gate** | ❌ failure | El check que decide (será el requerido en branch protection) |
+| 🔍 SAST | ❌ failure | El job de Semgrep encontró 1 hallazgo nuevo |
+| Semgrep OSS | ❌ failure | La alerta subida a Code Scanning: `sqli-string-built-query` en `app/main.py:115` |
+| 🔑 Secrets, 📦 Dependencies, 🐳 Container, 🧬 Rules + Tests | ✅ success | Sin hallazgos nuevos |
+| gitleaks, Trivy, Hadolint | ✅ success | Resultados de Code Scanning de esos controles |
+| 🤖 AI triage (advisory) | ✅ success | Corrió sin modelo configurado: no comenta |
+| 🏗️ IaC | ⏭ skipped | No hay Terraform |
+
+En Code Scanning, la única alerta abierta del PR sobre `app/main.py` es la de la línea 115. El gate no reporta como nueva la SQLi de la línea 108.
+
+![Checks del PR con el Security Gate en rojo](evidencias/05-pr-checks-rojo.png)
+
+![Alerta de SQLi en app/main.py:115](evidencias/06-alerta-sqli.png)
+
+- [x] Captura de los checks del PR con el Security Gate en rojo (`evidencias/05-pr-checks-rojo.png`)
+- [x] Captura de la alerta en `app/main.py:115` (`evidencias/06-alerta-sqli.png`)
 
 ## 3. Triage y corrección
 
-_Pendiente._
+El agente de IA no está configurado, así que el triage se hizo a mano con las mismas tres preguntas que respondería el bot.
+
+| Pregunta | Respuesta |
+|---|---|
+| **Hallazgo** | `auditgate.flask.sqli-string-built-query` en `app/main.py:115` |
+| **¿Verdadero o falso positivo?** | **Verdadero positivo.** `tipo` es un parámetro de consulta (`?tipo=`) que FastAPI entrega tal cual llega en la URL, sin validación, y el f-string lo pega dentro del SQL. Si el valor trae una comilla, cierra el string y lo que sigue se ejecuta como SQL |
+| **¿Es alcanzable?** | **Sí, sin autenticación.** `GET /equipos/tipo` no tiene `Depends(usuario_actual)` ni `Depends(solo_admin)`, así que cualquier visitante anónimo de Internet lo puede llamar. Cruza el límite de confianza L1 del Lab 1 |
+| **Impacto** | **Alto.** La tabla `equipos` tiene 4 columnas, así que un `UNION SELECT` de 4 columnas lee cualquier otra tabla. Con `?tipo=' UNION SELECT id, correo, clave, rol FROM usuarios--` la respuesta trae el correo, el hash de la contraseña y el rol de todas las cuentas, incluido el administrador. Es la misma consecuencia que T1 (T-17) del Lab 1 |
+| **Severidad** | I × P = 3 × 3 = **9**, igual que T1: el mismo patrón, en un endpoint nuevo |
+| **Fix** | Consulta parametrizada: el valor viaja aparte del SQL con `?` y una tupla, y SQLite lo trata como dato, nunca como código |
+
+**Prueba de que es explotable.** Se llamó al endpoint con un cliente de pruebas de FastAPI sobre una base temporal (no la del proyecto):
+
+| Petición | Respuesta |
+|---|---|
+| `GET /equipos/tipo?tipo=portatil` | `200`: los portátiles, como se espera |
+| `GET /equipos/tipo?tipo=' UNION SELECT id, correo, clave, rol FROM usuarios--` | `200`: en el campo `nombre` salen los correos (`admin@presta.edu.co`, `ana@presta.edu.co`…), en `tipo` los hashes de las contraseñas (`0192023a…`) y en `disponible` el rol (`admin`, `estudiante`) |
+
+El hallazgo no es teórico: un visitante sin cuenta extrae las credenciales de todos los usuarios con una sola petición.
+
+**Requisito ASVS:** V1 (codificación y sanitización: las consultas a la base usan parámetros). Mitiga T1 (T-17) del Lab 1.
+
+**El fix.** Se cambió solo la línea 115 de `app/main.py`:
+
+```diff
+-    filas = con.execute(f"SELECT * FROM equipos WHERE tipo = '{tipo}'").fetchall()
++    filas = con.execute("SELECT * FROM equipos WHERE tipo = ?", (tipo,)).fetchall()
+```
+
+**Prueba después del fix** (el mismo cliente de pruebas, sobre una base temporal):
+
+| Petición | Antes | Después |
+|---|---|---|
+| `?tipo=portatil` | `200`, 2 equipos | `200`, 2 equipos: la búsqueda legítima sigue funcionando |
+| `?tipo=' UNION SELECT id, correo, clave, rol FROM usuarios--` | `200`, correos, hashes y roles | `200`, `[]`: busca un equipo cuyo tipo sea literalmente ese texto y no encuentra ninguno |
+
+_Pendiente: el gate en verde en el PR._
 
 ## 4. Regla propia con prueba
 
