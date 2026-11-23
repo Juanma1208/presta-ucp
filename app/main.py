@@ -109,6 +109,13 @@ def listar_equipos(buscar: str = ""):
     con.close()
     return [dict(f) for f in filas]
 
+@app.get("/equipos/tipo")
+def equipos_por_tipo(tipo: str = ""):
+    con = conectar()
+    filas = con.execute("SELECT * FROM equipos WHERE tipo = ?", (tipo,)).fetchall()
+    con.close()
+    return [dict(f) for f in filas]
+
 
 @app.post("/equipos", status_code=201)
 def crear_equipo(datos: EquipoNuevo, admin: dict = Depends(solo_admin)):
