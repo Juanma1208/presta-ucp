@@ -159,7 +159,7 @@ En Code Scanning, la única alerta abierta del PR sobre `app/main.py` es la de l
 
 ## 3. Triage y corrección
 
-El agente de IA no está configurado, así que el triage se hizo a mano con las mismas tres preguntas que respondería el bot.
+En el PR #3 el agente de IA todavía no tenía modelo, así que el triage se hizo a mano con las mismas preguntas que responde el bot. Después se configuró el modelo y se repitió la falla en el PR #4 para comparar ambos triages (ver [Triage con el agente de IA](#triage-con-el-agente-de-ia-pr-4)).
 
 | Pregunta | Respuesta |
 |---|---|
@@ -206,6 +206,49 @@ El hallazgo no es teórico: un visitante sin cuenta extrae las credenciales de t
 Un primer intento del scan local siguió bloqueando porque el fix estaba guardado en disco pero no commiteado: el gate evalúa lo que entra al repositorio, no lo que hay en el editor.
 
 - [x] Captura de los checks del PR en verde (`evidencias/10-pr-checks-verde.png`)
+
+### Triage con el agente de IA (PR #4)
+
+**Configuración del modelo.** Se usó el mismo proveedor de la práctica de `seclab`: Groq, con una API compatible con OpenAI. No se cambió el código, solo la configuración del repo en GitHub:
+
+| Dónde | Nombre | Valor |
+|---|---|---|
+| Variable del repo | `AUDITGATE_LLM_PROVIDER` | `openai-compatible` |
+| Variable del repo | `AUDITGATE_LLM_MODEL` | `openai/gpt-oss-120b` |
+| Variable del repo | `AUDITGATE_LLM_BASE_URL` | `https://api.groq.com/openai/v1` |
+| Secreto (Environment `auditgate` y repo) | `AUDITGATE_LLM_API_KEY` | La llave de Groq, cargada por stdin con `auditgate set-key --key-stdin` (nunca se escribió en pantalla ni en el repo) |
+
+**Problema encontrado: la llave llegaba vacía.** Con la configuración de `auditgate init` (`secrets: inherit`), el job `🤖 AI triage` mostraba `AUDITGATE_LLM_API_KEY:` vacío y Groq respondía `401 Invalid API Key`. La razón es que `secrets: inherit` solo entrega secretos a un workflow reutilizable de la **misma organización**, y Auditgate es de otro dueño (`Jawy77/auditgate`). Se corrigió pasando la llave de forma explícita en el workflow del PR #4:
+
+```diff
+-    secrets: inherit
++    secrets:
++      AUDITGATE_LLM_API_KEY: ${{ secrets.AUDITGATE_LLM_API_KEY }}
+```
+
+Con ese cambio el log muestra `AUDITGATE_LLM_API_KEY: ***` (llega, y GitHub la enmascara). El cambio está solo en la rama del PR #4; `main` no se modificó.
+
+**La falla, otra vez.** El [PR #4](https://github.com/Juanma1208/presta-ucp/pull/4) (`lab3/triage-ia` → `main`) repite el commit `feat: filtrar equipos por tipo` con la misma SQLi de `app/main.py:115`. El `🚦 Security Gate` bloquea y el agente comenta en el PR:
+
+| # | Veredicto | Alcanzable | Regla | Ubicación | ¿Nuevo en el PR? |
+|---|---|---|---|---|---|
+| 0 | TP, confianza alta | sí | `wildcard-cors` | `app/main.py:31` | No (deuda de `main`) |
+| 1 | TP, confianza alta | sí | `sqli-string-built-query` | `app/main.py:108` | No (deuda de `main`, T1) |
+| 2 | TP, confianza alta | sí | `sqli-string-built-query` | `app/main.py:115` | **Sí: es la falla del PR** |
+
+Para el hallazgo #2 el agente explicó que `/equipos/tipo` arma el SQL con un f-string usando el parámetro `tipo`, y sugirió exactamente el mismo fix que se aplicó a mano: `"SELECT * FROM equipos WHERE tipo = ?", (tipo,)`. También propuso convertir el patrón en una regla genérica (Extract → Codify).
+
+![Comentario del agente de triage en el PR #4](evidencias/18-triage-ia-comentario.png)
+
+![Checks del PR #4: Security Gate en rojo y AI triage en verde](evidencias/19-pr4-gate-rojo-triage.png)
+
+**Después del fix.** Con la consulta parametrizada, todos los checks del PR #4 pasan y el agente actualiza su comentario: el hallazgo de la línea 115 desaparece y solo quedan el CORS y la SQLi de la línea 108, que son deuda de `main` y no bloquean. Esta vez el agente marcó uno de los dos hallazgos de la línea 108 como **duplicado**, porque Bandit (`B608`) y Semgrep reportan la misma SQLi.
+
+![Checks del PR #4 en verde tras el fix](evidencias/20-pr4-gate-verde.png)
+
+- [x] Captura del comentario del triage (`evidencias/18-triage-ia-comentario.png`)
+- [x] Captura del gate en rojo con el triage (`evidencias/19-pr4-gate-rojo-triage.png`)
+- [x] Captura del gate en verde tras el fix (`evidencias/20-pr4-gate-verde.png`)
 
 ## 4. Regla propia con prueba
 
@@ -270,7 +313,7 @@ La corrección del código en sí está en el PR #2 (Lab 2). Esta regla evita qu
 
 **¿Qué hallazgo bloqueó el gate que una persona habría dejado pasar?** La SQLi del endpoint nuevo `GET /equipos/tipo` (`app/main.py:115`), el mismo patrón de T1. El commit se llamaba `feat: filtrar equipos por tipo` y copiaba la forma de `listar_equipos`, que ya estaba en el archivo, por eso en una revisión se veía como código normal. Aun así, el endpoint no pedía autenticación y un visitante anónimo podía sacar el correo, el hash de la contraseña y el rol de todas las cuentas con una sola petición.
 
-**¿El triage acertó en el verdadero o falso positivo?** Como no se configuró el agente de IA, el triage se hizo a mano y se comprobó con una prueba de concepto. Era un verdadero positivo: antes del fix, el `UNION SELECT` devolvía las credenciales, y después de parametrizar la consulta la misma petición devolvió `[]`. En el PR no hubo falsos positivos, aunque sí un vacío: la regla de taint de Semgrep está hecha para Flask y no marcó la falla en FastAPI. Por eso se escribió una regla propia para T3, que no depende del nombre de la variable.
+**¿El triage acertó en el verdadero o falso positivo?** Sí. El agente de IA (`gpt-oss-120b` vía Groq) marcó la SQLi de `main.py:115` como verdadero positivo alcanzable y sugirió el mismo fix que se aplicó a mano, que antes se había comprobado con una prueba de concepto: el `UNION SELECT` devolvía las credenciales y, con la consulta parametrizada, la misma petición devolvió `[]`. Aun así, el agente no separa lo nuevo de lo viejo: también comentó como verdaderos positivos el CORS y la SQLi de la línea 108, que son deuda de `main`. Por eso el que decide es el gate y no la IA. Además hubo un vacío: la regla de taint de Semgrep está hecha para Flask y no marcó la falla en FastAPI, y por eso se escribió una regla propia para T3 que no depende del nombre de la variable.
 
 **¿Qué deuda vieja dejó pasar el gate y por qué está bien?** Dejó pasar la SQLi de `GET /equipos?buscar=` (T1, `main.py:108`), el secreto del JWT (T3, `auth.py:8`) y 4 vulnerabilidades en dependencias, porque ya estaban en `main` y no las introdujo el PR. Está bien porque, si el gate bloqueara la deuda vieja, ningún PR se podría mergear hasta arreglar todo, y el equipo terminaría ignorándolo. La deuda sigue visible en Code Scanning y su corrección está en el PR #2, mientras que el gate evita que se agregue más.
 
@@ -281,6 +324,7 @@ La corrección del código en sí está en el PR #2 (Lab 2). Esta regla evita qu
 | 1. Workflow `auditgate.yml` commiteado y branch protection con `Security Gate` requerido | `.github/workflows/auditgate.yml` en `main` (commit `32be498`) · sección 1 · `evidencias/02`, `16` y `17` |
 | 2. PR bloqueado por el gate y luego en verde tras el fix | [PR #3](https://github.com/Juanma1208/presta-ucp/pull/3) · secciones 2 y 3 · `evidencias/05`, `06`, `10` y `14` |
 | 3. Regla con dos fixtures y la prueba que pasa | `rules/jwt-secreto-en-codigo.yml` y `rules/jwt-secreto-en-codigo.py` · sección 4 · `evidencias/11`, `12`, `13` y `15` |
+| Triage con el agente de IA | [PR #4](https://github.com/Juanma1208/presta-ucp/pull/4) · sección 3 (Triage con el agente de IA) · `evidencias/18`, `19` y `20` |
 | 4. Tres líneas de reflexión | Sección 5 |
 
-El PR #3 queda abierto como evidencia y no se mergea por ahora. El PR #2 (Lab 2) no se modificó en ningún paso de este laboratorio.
+Los PR #3 y #4 quedan abiertos como evidencia y no se mergean por ahora. El PR #2 (Lab 2) no se modificó en ningún paso de este laboratorio.
