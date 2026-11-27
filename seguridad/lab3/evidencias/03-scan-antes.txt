@@ -1,0 +1,8 @@
+Auditgate scan — base origin/main (32be498) → HEAD (e3b1978)
+  ⚠ tienes cambios sin commitear: no se evalúan (el PR solo lleva commits)
+  Lenguajes: python (6)
+  ✔ secrets  gitleaks   0 nuevos
+  ✔ sast     semgrep    0 nuevos
+  ✔ deps     osv-scanner 0 nuevos  (ecosistemas: PyPI · 4 previa(s): deuda, no bloquea)
+  ✔ actions  auditgate  fijadas por SHA
+✅ Pasa: el PR no introduce problemas que el gate bloquee.

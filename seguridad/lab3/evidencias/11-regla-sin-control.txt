@@ -1,0 +1,35 @@
+               
+               
+┌─────────────┐
+│ Scan Status │
+└─────────────┘
+  Scanning 1 file tracked by git with 1 Code rule:
+  Scanning 1 file.
+                
+                
+┌──────────────┐
+│ Scan Summary │
+└──────────────┘
+✅ Scan completed successfully.
+ • Findings: 2 (2 blocking)
+ • Rules run: 1
+ • Targets scanned: 1
+ • Parsed lines: ~100.0%
+ • No ignore information available
+Ran 1 rule on 1 file: 2 findings.
+                   
+                   
+┌─────────────────┐
+│ 2 Code Findings │
+└─────────────────┘
+               
+    app/auth.py
+   ❯❯❱ rules.presta.jwt-secreto-en-codigo
+          ❰❰ Blocking ❱❱
+          El JWT se firma o verifica con una clave escrita en el código. Quien lea el repositorio puede
+          fabricar tokens válidos. Lee la clave de una variable de entorno.                            
+                                                                                                       
+           24┆ return jwt.encode(datos, SECRET_KEY, algorithm=ALGORITMO)
+            ⋮┆----------------------------------------
+           29┆ datos = jwt.decode(credenciales.credentials, SECRET_KEY, algorithms=[ALGORITMO])
+
